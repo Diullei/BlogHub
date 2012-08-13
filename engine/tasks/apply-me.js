@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 var config = require('../../blog/me.js').cfg,
+=======
+var config = require('./../me.js').cfg,
+>>>>>>> 76d57c402b694337a47bfcfc7775cbc6ce544b69
 	_ = require('./../js/libs/underscore/underscore.js'),
 	fs = require('fs');
 
