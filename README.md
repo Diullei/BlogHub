@@ -15,7 +15,7 @@ BlogHub
 
 ```$> start_server```
 
-Go to http:\\localhost:100
+Go to http://localhost:100
 
 Enjoy!
 
@@ -24,5 +24,4 @@ Enjoy!
 Who is using?
 
 * [Diullei Gomes](http://diullei.github.com)
-
 * [Rodrigo Vidal](http://rodrigovidal.github.com)
