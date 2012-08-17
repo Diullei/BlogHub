@@ -45,8 +45,24 @@ _cmd.install = function(){
 	if(!directoryExists('../blog')) {
 		console.log('[install] create directory: /blog');
 		fs.mkdirSync('../blog');
+	}
+	if(!directoryExists('../blog/img')) {
+		console.log('[install] create directory: /blog/img');
+		fs.mkdirSync('../blog/img');
+	}
+	if(!directoryExists('../blog/compiled-sources')) {
+		console.log('[install] create directory: /blog/compiled-sources');
+		fs.mkdirSync('../blog/compiled-sources');
+	}
+	if(!directoryExists('../blog/compiled-sources/posts')) {
+		console.log('[install] create directory: /blog/compiled-sources/posts');
+		fs.mkdirSync('../blog/compiled-sources/posts');
+	}
+	if(!directoryExists('../blog/posts')) {
+		console.log('[install] create directory: /blog/posts');
+		fs.mkdirSync('../blog/posts');
 		
-		fs.writeFileSync('../blog/hello_world.post', '\n\
+		fs.writeFileSync('../blog/posts/hello_world.post', '\n\
 @id: 0\n\
 \n\
 @title: Hello World\n\
@@ -70,23 +86,7 @@ Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! He
 <pre><code>function helloWorld(){\n\
 	return "Hello World!";\n\
 \}</code></pre>');	
-		console.log('[install] create file: blog/hello_world.post');
-	}
-	if(!directoryExists('../blog/img')) {
-		console.log('[install] create directory: /blog/img');
-		fs.mkdirSync('../blog/img');
-	}
-	if(!directoryExists('../blog/compiled-sources')) {
-		console.log('[install] create directory: /blog/compiled-sources');
-		fs.mkdirSync('../blog/compiled-sources');
-	}
-	if(!directoryExists('../blog/compiled-sources/posts')) {
-		console.log('[install] create directory: /blog/compiled-sources/posts');
-		fs.mkdirSync('../blog/compiled-sources/posts');
-	}
-	if(!directoryExists('../blog/posts')) {
-		console.log('[install] create directory: /blog/posts');
-		fs.mkdirSync('../blog/posts');
+		console.log('[install] create file: blog/posts/hello_world.post');
 	}
 	
 	fs.writeFileSync('../start_server.cmd', 'node engine\\server.js 100 .');	
