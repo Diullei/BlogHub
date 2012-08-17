@@ -45,6 +45,33 @@ _cmd.install = function(){
 	if(!directoryExists('../blog')) {
 		console.log('[install] create directory: /blog');
 		fs.mkdirSync('../blog');
+		
+		fs.writeFileSync('../blog/hello_world.post', '\
+@id: 0\
+\
+@title: Hello World\
+\
+@by: Me\
+\
+@tags: Hello World\
+\
+@category: Hello World\
+\
+@date: 01-01-2012\
+\
+@deploy: true\
+\
+@content:\
+\
+### Hello World\
+\
+Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World!\
+\
+<pre><code>function helloWorld(){\
+	return "Hello World!";\
+\}</code></pre>\
+\');	
+		console.log('[install] create file: blog/hello_world.post');
 	}
 	if(!directoryExists('../blog/img')) {
 		console.log('[install] create directory: /blog/img');
