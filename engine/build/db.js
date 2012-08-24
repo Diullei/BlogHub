@@ -85,6 +85,8 @@ Atom.prototype.toXml = function(){
 					
 			  	post.ref = file.toLowerCase() + '.mkdown';
 				
+				post.content = post.content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
 				if(post.deploy == 'true') {
 					indexer.push(post);
 					console.log('Mapping: ' + post.title);
