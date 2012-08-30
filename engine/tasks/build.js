@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-var program = require('./../js/libs/commander');
-
-program
-  .version('0.0.1')
-  .option('-c, --compile', 'Compile blog')
-  .option('-a, --config', 'Apply user custom configs')
-  .option('-u, --update', 'Update BlogHub engine')
-  .parse(process.argv);
-  
-if(program.compile) {
-=======
 var fs = require('fs');
 var program = require('./../js/libs/commander');
 
@@ -29,7 +17,6 @@ function directoryExists(path) {
 }
 
 _cmd.compile = function(){
->>>>>>> 76d57c402b694337a47bfcfc7775cbc6ce544b69
 	console.log('Compiling resources...\n');
 	
 	try{
@@ -39,16 +26,10 @@ _cmd.compile = function(){
 	catch(err){
 		console.log('Error: ' + err.message);
 	}
-<<<<<<< HEAD
-} else if(program.config) {
-	console.log('Applying ser configurations...');
-	
-=======
 };
 
 _cmd.config = function(){
 	console.log('Applying ser configurations...');
->>>>>>> 76d57c402b694337a47bfcfc7775cbc6ce544b69
 	try{
 		require('./apply-me').applyConfig();
 		console.log('\nSuccessful');
@@ -56,8 +37,6 @@ _cmd.config = function(){
 	catch(err){
 		console.log('Error: ' + err.message);
 	}
-<<<<<<< HEAD
-=======
 };
 
 _cmd.install = function(){
@@ -103,5 +82,4 @@ if(program.compile) {
 } else if (program.install){
 	_cmd.install();
 	_cmd.config();
->>>>>>> 76d57c402b694337a47bfcfc7775cbc6ce544b69
 }
