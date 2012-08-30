@@ -12,7 +12,15 @@ if(process.argv.length > 2) {
 	}
 } 
 
-var virtual_path = '.';
+
+var virtual_path;
+if (process.platform === 'darwin')
+    virtual_path = '..';
+else if (process.platform === 'win32')
+    virtual_path = '.';
+else 
+    throw Error('Unknow platform');
+
 if(process.argv.length > 3) {
 	console.log('virtual_path: ' + process.argv[3]);
 	try{
