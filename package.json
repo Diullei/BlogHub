@@ -13,7 +13,8 @@
 		"url" : "http://github.com/Diullei/BlogHub.git"
 	}, 
 	"devDependencies": { 
-		"nodeunit": ">=0.7.4"
+		"nodeunit": ">=0.7.4",
+		"typescript": ">=0.8.1"
 	}, 
 	"bugs" : { "url" : "http://github.com/Diullei/BlogHub/issues" }, 
 	"licenses" : [ { 
