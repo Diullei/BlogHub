@@ -1,0 +1,27 @@
+{ 
+	"name": "BlogHub", 
+	"description": "Blog engine.", 
+	"maintainers": [ { 
+		"name": "Diullei Gomes", 
+		"web": "https://github.com/diullei"
+		}
+	], 
+	"contributors" : [ ], 
+	"version": "0.1.0", 
+	"repository" : { 
+		"type" : "git", 
+		"url" : "http://github.com/Diullei/BlogHub.git"
+	}, 
+	"devDependencies": { 
+		"nodeunit": ">=0.7.4"
+	}, 
+	"bugs" : { "url" : "http://github.com/Diullei/BlogHub/issues" }, 
+	"licenses" : [ { 
+		"type" : "MIT", 
+		"url" : "http://github.com/Diullei/BlogHub/raw/master/LICENSE"
+		}
+	], 
+	"directories" : { "lib": "./lib" }, 
+	"bin" : { "nodeunit" : "./bin/blogHub" }, 
+	"dependencies" : {}
+}
