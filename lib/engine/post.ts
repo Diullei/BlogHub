@@ -1,6 +1,7 @@
 declare var require: any;
 
 var fs = require('fs');
+var jade = require('jade');
 var Showdown = require('./libs/showdown.js');
 
 class PostFile {
@@ -48,9 +49,39 @@ class PostFile {
 	}
 }
 
-class Post {
+class Source {
+	constructor(public content: string, public path: string) {
+	}
+}
+
+class Page {
+	postFile: PostFile;
+	private template: string = 'index.html';
+	
+	constructor(public blog: Blog) {
+	}
+	
+	parserPostData() {
+	}
+	
+	public build(): Source {
+		var fileContent = null;
+		try {
+		  fileContent = fs.readFileSync(this.blog.path + '/templates/' + this.template, 'binary');
+		}
+		catch (err) {
+		  console.error("There was an error opening the file:");
+		  console.log(err);
+		}
+		
+		var render = jade.compile(fileContent);
+		
+		return new Source(render(this), this.blog.path);
+	}
+}
+
+class Post extends Page {
 	private MATCH: any = /^(.+\/)*(\d{4}-\d{2}-\d{2})-(.*)(\.[^.]+)$/g;
-	private postFile: PostFile;
 	
 	public header: {
 		title: string; 
@@ -67,7 +98,9 @@ class Post {
 		html: string;
 	} = {md: null, html: null};
 	
-	constructor(public file: string, public blog: Blog) {
+	constructor(public file: string, blog: Blog) {
+		super(blog);
+		
 		if(!this.file) {
 			throw new Error('post file name cant be null');
 		}
@@ -82,6 +115,8 @@ class Post {
 	
 	private parserPostData() {
 		this.postFile = new PostFile(this.file, this.blog);
+		
+		super.parserPostData();
 		
 		for(var key in this.postFile.header) {
 			if(key == 'title') {

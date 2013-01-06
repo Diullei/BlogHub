@@ -27,5 +27,7 @@ exports.testPostFileName = function(test) {
 	test.ok(post.header.tags[1] == "categ2");
 	test.ok(post.header.tags[2] == "categ3");
 	
+	console.log(post.build().content);
+	
 	test.done();
 }
