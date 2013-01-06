@@ -1,0 +1,1 @@
+tsc lib/blogHub.ts --out bin/main.js
