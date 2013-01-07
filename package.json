@@ -24,7 +24,7 @@
 		}
 	], 
 	"directories" : { "lib": "./lib" }, 
-	"bin" : { "nodeunit" : "./bin/blogHub" }, 
+	"bin" : { "bloghub" : "./bin/bloghub" }, 
 	"dependencies" : {
 		"jade" : "latest"
 	}
