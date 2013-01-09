@@ -1,22 +1,17 @@
 var Blog = (function () {
     function Blog(path) {
         this.path = path;
-        this.config = {
-            pagePathName: "/:header.category/:date.y/:date.m/:date.d/:name"
-        };
     }
     Blog.prototype.buildRelatovePathName = function (page) {
-        var result = '/';
-        var parts = this.config.pagePathName.split('/');
+        var result = '/' + page.config['folders']['site'] + '/';
+        var parts = page.config['folders']['relativePath'].split('/');
         for(var i = 0; i < parts.length; i++) {
             if(parts[i] && parts[i].substr(1).trim() != '') {
                 var p = eval('page.' + parts[i].substr(1));
                 if(p) {
                     result += p;
                 }
-                if(i < parts.length - 1) {
-                    result += '/';
-                }
+                result += '/';
             }
         }
         return result;
@@ -29,18 +24,20 @@ var Source = (function () {
         this.path = path;
     }
     Source.prototype.save = function () {
+        fs2.mkdirSync(this.path, 777, true);
+        fs.writeFileSync(this.path + 'index.html', this.content, 'utf8');
     };
     return Source;
 })();
 var SiteFile = (function () {
-    function SiteFile(file, blog) {
+    function SiteFile(file, blog, config) {
         this.BREAK_LINE = '\n';
         this.header = {
         };
         var lines = null;
         var fileContent = null;
         try  {
-            fileContent = fs.readFileSync(blog.path + '/' + file, 'binary');
+            fileContent = fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, 'binary');
         } catch (err) {
             console.error("There was an error opening the file:");
             console.log(err);
@@ -60,7 +57,7 @@ var SiteFile = (function () {
                     }
                 } else {
                     var key = line.split(':')[0];
-                    this.header[key] = line.substr(key.length + 1).trim();
+                    this.header[key.trim()] = line.substr(key.length + 1).trim();
                 }
             }
         }
@@ -72,38 +69,48 @@ var SiteFile = (function () {
     }
     return SiteFile;
 })();
-var Page = (function () {
-    function Page(blog) {
+var PageBase = (function () {
+    function PageBase(blog, config, siteHub) {
         this.blog = blog;
-        this.template = 'index.html';
+        this.config = config;
+        this.siteHub = siteHub;
     }
-    Page.prototype.parserSiteData = function () {
+    PageBase.prototype.parserSiteData = function () {
+        if(this.siteFile.header['group']) {
+            this.group = this.siteFile.header['group'];
+        }
     };
-    Page.prototype.outName = function () {
+    PageBase.prototype.outName = function () {
         return this.blog.buildRelatovePathName(this);
     };
-    Page.prototype.build = function () {
+    PageBase.prototype.build = function () {
+        this.url = this.outName().substr(this.config['folders']['site'].length + 1);
+    };
+    PageBase.prototype.getSource = function () {
         var fileContent = null;
         try  {
-            fileContent = fs.readFileSync(this.blog.path + '/templates/' + this.template, 'binary');
+            fileContent = fs.readFileSync(this.blog.path + '/' + this.config['folders']['theme'] + '/' + this.config['template']['default'], 'binary');
         } catch (err) {
             console.error("There was an error opening the file:");
             console.log(err);
         }
         var render = jade.compile(fileContent);
-        return new Source(render(this), this.blog.path + this.outName());
+        return new Source(render({
+            main: this.siteHub,
+            page: this
+        }), this.blog.path + this.outName());
     };
-    return Page;
+    return PageBase;
 })();
 var __extends = this.__extends || function (d, b) {
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var Site = (function (_super) {
-    __extends(Site, _super);
-    function Site(file, blog) {
-        _super.call(this, blog);
+var Page = (function (_super) {
+    __extends(Page, _super);
+    function Page(file, blog, config, siteHub) {
+        _super.call(this, blog, config, siteHub);
         this.file = file;
         this.MATCH = /^(.+\/)*(\d{4}-\d{2}-\d{2})-(.*)(\.[^.]+)$/g;
         this.header = {
@@ -130,8 +137,8 @@ var Site = (function (_super) {
         this.parseDate(file.substring(0, 10));
         this.parserSiteData();
     }
-    Site.prototype.parserSiteData = function () {
-        this.siteFile = new SiteFile(this.file, this.blog);
+    Page.prototype.parserSiteData = function () {
+        this.siteFile = new SiteFile(this.file, this.blog, this.config);
         _super.prototype.parserSiteData.call(this);
         for(var key in this.siteFile.header) {
             if(key == 'title') {
@@ -152,22 +159,82 @@ var Site = (function (_super) {
             this.header.tags[i] = this.header.tags[i].trim();
         }
     };
-    Site.prototype.parseDate = function (strDate) {
+    Page.prototype.parseDate = function (strDate) {
         this.date.y = strDate.substr(0, 4);
         this.date.m = strDate.substr(5, 2);
         this.date.d = strDate.substr(8, 2);
     };
-    Site.prototype.validate = function (file) {
+    Page.prototype.validate = function (file) {
         return file.match(this.MATCH);
     };
-    return Site;
-})(Page);
-var fs = require('fs');
+    return Page;
+})(PageBase);
 var jade = require('jade');
+var fs = require('fs');
+var fs2 = require('./libs/node-fs');
+var fs3 = require('./libs/fs.removeRecursive');
 var Showdown = require('./libs/showdown.js');
-var files = fs.readdirSync('_content');
-if(files.length > 0) {
-    for(var i = 0; i < files.length; i++) {
-        var site = new Site(files[i], new Blog('./_content'));
+var Enumerable = require('./libs/linq');
+var SiteHub = (function () {
+    function SiteHub() {
+        this.pages = [];
+        this.blog = new Blog('.');
     }
-}
+    SiteHub.prototype.loadConfig = function () {
+        var fileContent = null;
+        try  {
+            fileContent = fs.readFileSync('./_config.json');
+        } catch (err) {
+            console.error("There was an error opening the file:");
+            console.log(err);
+        }
+        this.config = JSON.parse(fileContent);
+    };
+    SiteHub.prototype.build = function () {
+        var _this = this;
+        this.loadConfig();
+        var files = fs.readdirSync(this.config['folders']['content']);
+        var groups = [];
+        if(files.length > 0) {
+            for(var i = 0; i < files.length; i++) {
+                var page = new Page(files[i], this.blog, this.config, this);
+                this.pages.push(page);
+                if(!page.group) {
+                    page.group = '';
+                }
+                if(!groups[page.group]) {
+                    groups[page.group] = [];
+                }
+                groups[page.group].push(page);
+            }
+            for(var key in groups) {
+                var group = groups[key];
+                for(var k = 0; k < group.length; k++) {
+                    if(k > 0) {
+                        group[k].previous = group[k - 1];
+                    }
+                    if(k < group.length) {
+                        group[k].next = group[k + 1];
+                    }
+                }
+            }
+            for(var i = 0; i < this.pages.length; i++) {
+                this.pages[i].build();
+            }
+            fs3.removeRecursive(this.blog.path + '/' + this.config['folders']['site'], function () {
+                for(var i = 0; i < _this.pages.length; i++) {
+                    _this.pages[i].getSource().save();
+                }
+            });
+        }
+    };
+    return SiteHub;
+})();
+var Main = (function () {
+    function Main() { }
+    Main.run = function run() {
+        new SiteHub().build();
+    }
+    return Main;
+})();
+Main.run();

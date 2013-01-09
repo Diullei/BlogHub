@@ -12,10 +12,11 @@
 		"type" : "git", 
 		"url" : "http://github.com/Diullei/BlogHub.git"
 	}, 
-	"devDependencies": {},
+	"devDependencies": {
+		"qunit" : "latest"
+	},
 	"scripts": {
-	  "preinstall": "npm i -g typescript",
-	  "preinstall": "npm i -g nodeunit"
+	  "preinstall": "npm i -g typescript"
 	},
 	"bugs" : { "url" : "http://github.com/Diullei/BlogHub/issues" }, 
 	"licenses" : [ { 
@@ -26,6 +27,7 @@
 	"directories" : { "lib": "./lib" }, 
 	"bin" : { "bloghub" : "./bin/bloghub" }, 
 	"dependencies" : {
-		"jade" : "latest"
+		"jade" : "latest",
+		"underscore" : "latest"
 	}
 }

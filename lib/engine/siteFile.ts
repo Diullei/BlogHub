@@ -4,11 +4,11 @@ class SiteFile {
 	public header: Object = {};
 	public content: string;
 
-	constructor(file: string, blog: Blog) {
+	constructor(file: string, blog: Blog, config: Object) {
 		var lines = null;
 		var fileContent = null;
 		try {
-		  fileContent = fs.readFileSync(blog.path + '/' + file, 'binary');
+		  fileContent = fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, 'binary');
 		}
 		catch (err) {
 		  console.error("There was an error opening the file:");
@@ -30,8 +30,8 @@ class SiteFile {
 					break;
 				}
 			} else {
-				var key = line.split(':')[0];
-				this.header[key] = line.substr(key.length + 1).trim();
+			    var key = line.split(':')[0];
+				this.header[key.trim()] = line.substr(key.length + 1).trim();
 			}
 		}
 		

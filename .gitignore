@@ -2,3 +2,10 @@
 node_modules
 temp
 bin/main-test.js
+_ReSharper.BlogHub
+Properties
+BlogHub.csproj
+obj
+bin\Debug
+bin\Release
+BlogHub.sln
