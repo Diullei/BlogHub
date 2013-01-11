@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{77B9279C-8618-418C-BF92-7A7479DEB0B0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BlogHub</RootNamespace>
+    <AssemblyName>BlogHub</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="definition\linq-2.2.d.ts" />
+    <Content Include="lib\blogHub.ts" />
+    <Content Include="lib\engine\blog.ts" />
+    <Content Include="lib\engine\main.ts" />
+    <Content Include="lib\engine\pageBase.ts" />
+    <Content Include="lib\engine\page.ts" />
+    <Content Include="lib\engine\siteFile.ts" />
+    <Content Include="lib\engine\siteHub.ts" />
+    <Content Include="lib\engine\source.ts" />
+    <Content Include="lib\base\atom.xml" />
+    <Content Include="lib\base\_theme\index.html" />
+    <Content Include="lib\base\_plugins\GroupPaginator\main.ts" />
+    <Content Include="lib\base\_plugins\GroupPaginator\template.html" />
+    <Content Include="test\files\blog\templates\index.html" />
+    <Content Include="test\site_test.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lib\base\_config.json" />
+    <None Include="lib\base\_content\2011-02-16-fsharp-programacao-funcional.md" />
+    <None Include="lib\base\_content\2012-09-20-Configurando-o-NodeJs-com-o-Npp.md" />
+    <None Include="lib\base\_content\2012-09-27-Debugando-TyprScript-no-navegador.md" />
+    <None Include="lib\base\_content\2012-09-30-Introducao-ao-TypeScript.md" />
+    <None Include="lib\base\_content\2012-10-01-JavaScript-NoConflict.md" />
+    <None Include="lib\base\_content\2012-11-11-Lendo-arquivos-com-Nodejs.md" />
+    <None Include="test\files\blog\2013-01-05-site-name.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="lib\base\_src\" />
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>tsc $(ProjectDir)lib/blogHub.ts --out $(ProjectDir)bin/main.js
+tsc $(ProjectDir)lib/base/_plugins/GroupPaginator/main.ts</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

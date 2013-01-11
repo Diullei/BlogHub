@@ -170,14 +170,6 @@ var Page = (function (_super) {
     };
     return Page;
 })(PageBase);
-var ncp = require('ncp').ncp;
-var jade = require('jade');
-var fs = require('fs');
-var fs2 = require('./libs/node-fs');
-var fs3 = require('./libs/fs.removeRecursive');
-var Showdown = require('./libs/showdown.js');
-var Enumerable = require('./libs/linq');
-ncp.limit = 16;
 var SiteHub = (function () {
     function SiteHub() {
         this.pages = [];
@@ -207,15 +199,21 @@ var SiteHub = (function () {
         this.config = JSON.parse(fileContent);
         this.loadPlugins();
     };
-    SiteHub.prototype.build = function () {
-        var _this = this;
-        this.loadConfig();
+    SiteHub.prototype.loadPages = function () {
         var files = fs.readdirSync(this.config['folders']['content']);
-        var groups = [];
+        ; ;
         if(files.length > 0) {
             for(var i = 0; i < files.length; i++) {
                 var page = new Page(files[i], this.blog, this.config, this);
                 this.pages.push(page);
+            }
+        }
+    };
+    SiteHub.prototype.loadGroups = function () {
+        var groups = [];
+        if(this.pages.length > 0) {
+            for(var i = 0; i < this.pages.length; i++) {
+                var page = this.pages[i];
                 if(!groups[page.group]) {
                     groups[page.group] = [];
                 }
@@ -232,6 +230,14 @@ var SiteHub = (function () {
                     }
                 }
             }
+        }
+    };
+    SiteHub.prototype.build = function () {
+        var _this = this;
+        this.loadConfig();
+        this.loadPages();
+        this.loadGroups();
+        if(this.pages.length > 0) {
             for(var i = 0; i < this.pages.length; i++) {
                 this.pages[i].build();
             }
@@ -246,29 +252,40 @@ var SiteHub = (function () {
 })();
 var Main = (function () {
     function Main() { }
-    Main.run = function run() {
+    Main.createSite = function createSite() {
+        console.log('creating new site...');
+        var itens = fs.readdirSync("./");
+        if(itens.length > 0) {
+            console.log('Error! this folder is not empty.');
+        } else {
+            ncp(__dirname + '/../lib/base/', "./", function (err) {
+                if(err) {
+                    return console.error(err);
+                }
+                console.log('site created!');
+            });
+        }
+    }
+    Main.build = function build() {
         new SiteHub().build();
+    }
+    Main.run = function run() {
+        var arg1 = process.argv[2];
+        if(!arg1) {
+            Main.build();
+        }
+        if(arg1 == 'new') {
+            Main.createSite();
+        }
     }
     return Main;
 })();
-function createSite() {
-    console.log('creating new site...');
-    var itens = fs.readdirSync("./");
-    if(itens.length > 0) {
-        console.log('Error! this folder is not empty.');
-    } else {
-        ncp(__dirname + '/../lib/base/', "./", function (err) {
-            if(err) {
-                return console.error(err);
-            }
-            console.log('site created!');
-        });
-    }
-}
-var arg1 = process.argv[2];
-if(!arg1) {
-    Main.run();
-}
-if(arg1 == 'new') {
-    createSite();
-}
+var ncp = require('ncp').ncp;
+var jade = require('jade');
+var fs = require('fs');
+var fs2 = require('./libs/node-fs');
+var fs3 = require('./libs/fs.removeRecursive');
+var Showdown = require('./libs/showdown.js');
+var Enumerable = require('./libs/linq');
+ncp.limit = 16;
+Main.run();
