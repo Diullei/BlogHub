@@ -8,7 +8,7 @@ class SiteFile {
 		var lines = null;
 		var fileContent = null;
 		try {
-		  fileContent = fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, 'binary');
+		  fileContent = fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, 'utf8');
 		}
 		catch (err) {
 		  console.error("There was an error opening the file:");

@@ -37,7 +37,7 @@ var SiteFile = (function () {
         var lines = null;
         var fileContent = null;
         try  {
-            fileContent = fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, 'binary');
+            fileContent = fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, 'utf8');
         } catch (err) {
             console.error("There was an error opening the file:");
             console.log(err);
@@ -74,6 +74,7 @@ var PageBase = (function () {
         this.blog = blog;
         this.config = config;
         this.siteHub = siteHub;
+        this.group = '';
     }
     PageBase.prototype.parserSiteData = function () {
         if(this.siteFile.header['group']) {
@@ -89,7 +90,7 @@ var PageBase = (function () {
     PageBase.prototype.getSource = function () {
         var fileContent = null;
         try  {
-            fileContent = fs.readFileSync(this.blog.path + '/' + this.config['folders']['theme'] + '/' + this.config['template']['default'], 'binary');
+            fileContent = fs.readFileSync(this.blog.path + '/' + this.config['folders']['theme'] + '/' + this.config['template']['default'], 'utf8');
         } catch (err) {
             console.error("There was an error opening the file:");
             console.log(err);
@@ -169,17 +170,32 @@ var Page = (function (_super) {
     };
     return Page;
 })(PageBase);
+var ncp = require('ncp').ncp;
 var jade = require('jade');
 var fs = require('fs');
 var fs2 = require('./libs/node-fs');
 var fs3 = require('./libs/fs.removeRecursive');
 var Showdown = require('./libs/showdown.js');
 var Enumerable = require('./libs/linq');
+ncp.limit = 16;
 var SiteHub = (function () {
     function SiteHub() {
         this.pages = [];
+        this.plugins = {
+        };
         this.blog = new Blog('.');
     }
+    SiteHub.prototype.renderPlugin = function (plugin, main, page) {
+        return this.plugins[plugin.toUpperCase()].render(main, page);
+    };
+    SiteHub.prototype.loadPlugins = function () {
+        var itens = fs.readdirSync(this.config['folders']['plugins']);
+        for(var i = 0; i < itens.length; i++) {
+            var item = itens[i];
+            var plugin = require(process.cwd() + '/' + this.config['folders']['plugins'] + '/' + item + '/main.js');
+            this.plugins[item.toUpperCase()] = plugin;
+        }
+    };
     SiteHub.prototype.loadConfig = function () {
         var fileContent = null;
         try  {
@@ -189,6 +205,7 @@ var SiteHub = (function () {
             console.log(err);
         }
         this.config = JSON.parse(fileContent);
+        this.loadPlugins();
     };
     SiteHub.prototype.build = function () {
         var _this = this;
@@ -199,9 +216,6 @@ var SiteHub = (function () {
             for(var i = 0; i < files.length; i++) {
                 var page = new Page(files[i], this.blog, this.config, this);
                 this.pages.push(page);
-                if(!page.group) {
-                    page.group = '';
-                }
                 if(!groups[page.group]) {
                     groups[page.group] = [];
                 }
@@ -221,7 +235,7 @@ var SiteHub = (function () {
             for(var i = 0; i < this.pages.length; i++) {
                 this.pages[i].build();
             }
-            fs3.removeRecursive(this.blog.path + '/' + this.config['folders']['site'], function () {
+            fs3.removeRecursive(this.blog.path + '/' + this.config['folders']['site'], function (err, status) {
                 for(var i = 0; i < _this.pages.length; i++) {
                     _this.pages[i].getSource().save();
                 }
@@ -237,4 +251,24 @@ var Main = (function () {
     }
     return Main;
 })();
-Main.run();
+function createSite() {
+    console.log('creating new site...');
+    var itens = fs.readdirSync("./");
+    if(itens.length > 0) {
+        console.log('Error! this folder is not empty.');
+    } else {
+        ncp(__dirname + '/../lib/base/', "./", function (err) {
+            if(err) {
+                return console.error(err);
+            }
+            console.log('site created!');
+        });
+    }
+}
+var arg1 = process.argv[2];
+if(!arg1) {
+    Main.run();
+}
+if(arg1 == 'new') {
+    createSite();
+}

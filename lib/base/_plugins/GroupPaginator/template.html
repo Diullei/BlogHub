@@ -1,0 +1,36 @@
+div#pagination
+	ul
+		- if(page.previous) {
+			li#prev
+				a(href='#{(
+                    main.config.folders.basePath 
+                        ? main.config.folders.basePath 
+                        : '' ) 
+                    + page.previous.url
+                    + (
+                    main.config.folders.basePath 
+                        ? 'index.html' 
+                        : '' )}', title=page.previous.title) &larr; Previous
+		- } else {
+			li#prev.disabled
+				a &larr; Previous
+		- }
+				
+		li
+			a(href="") Archive
+
+		- if(page.next) {
+			li#next
+				a(href='#{(
+                    main.config.folders.basePath 
+                        ? main.config.folders.basePath 
+                        : '' ) 
+                    + page.next.url
+                    + (
+                    main.config.folders.basePath 
+                        ? 'index.html' 
+                        : '' )}', title=page.next.title) Next &rarr;
+		- } else {
+			li#next.disabled
+				a Next &rarr;
+		- }

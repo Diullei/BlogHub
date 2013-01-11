@@ -1,0 +1,9 @@
+div#page-header 
+	h1 
+		#{page.title}
+
+div#row
+	div#span8
+		!{page.content.html}
+		hr
+		div !{ main.renderPlugin('GroupPaginator', main, page) }

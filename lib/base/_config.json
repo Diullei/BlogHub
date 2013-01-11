@@ -1,0 +1,26 @@
+{
+	"version": "0.1.0",
+	"folders": {
+		"content": "_content",
+		"plugins": "_plugins",
+		"site": "_site",
+		"src": "_src",
+		"theme": "_theme",
+		"relativePath":"/:header.category/:date.y/:date.m/:date.d/:name",
+		"basePath": false,
+		"tmp_comment": "file:///C:/Users/dgomes/Documents/GitHub/BlogHub/temp/_site/"
+	},
+	"template": {
+		"default": "index.html"
+	},
+	"title": "Diullei Gomes",
+	"tagLine": "JavaScript Development",
+	"author": {
+		"name": "Diullei Gomes",
+		"email": "diullei@gmail.com",
+		"github": "Diullei",
+		"twitter": "diullei"
+	},
+	"url": "http://current.url",
+	"home": "Test1/2012/09/30/Introducao-ao-TypeScript"
+}

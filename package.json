@@ -28,6 +28,7 @@
 	"bin" : { "bloghub" : "./bin/bloghub" }, 
 	"dependencies" : {
 		"jade" : "latest",
-		"underscore" : "latest"
+		"underscore" : "latest",
+		"ncp" : "latest"
 	}
 }
