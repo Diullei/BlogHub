@@ -30,7 +30,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="bin\libs\dateFormat.js" />
+    <Content Include="bin\libs\fs.removeRecursive.js" />
+    <Content Include="bin\libs\linq.js" />
+    <Content Include="bin\libs\node-fs.js" />
+    <Content Include="bin\libs\showdown.js" />
     <Content Include="definition\linq-2.2.d.ts" />
+    <Content Include="definition\node-0.8.d.ts" />
     <Content Include="lib\base\_theme\css\bootstrap-responsive.css" />
     <Content Include="lib\base\_theme\css\bootstrap-responsive.min.css" />
     <Content Include="lib\base\_theme\css\bootstrap.css" />
@@ -41,12 +47,12 @@
     <Content Include="lib\base\_theme\js\bootstrap.js" />
     <Content Include="lib\base\_theme\js\bootstrap.min.js" />
     <Content Include="lib\blogHub.ts" />
-    <Content Include="lib\engine\blog.ts" />
+    <Content Include="lib\engine\site\blog\blog.ts" />
     <Content Include="lib\engine\main.ts" />
-    <Content Include="lib\engine\pageBase.ts" />
-    <Content Include="lib\engine\page.ts" />
-    <Content Include="lib\engine\siteFile.ts" />
-    <Content Include="lib\engine\siteHub.ts" />
+    <Content Include="lib\engine\site\siteBase.ts" />
+    <Content Include="lib\engine\site\page.ts" />
+    <Content Include="lib\engine\site\siteFile.ts" />
+    <Content Include="lib\engine\site\siteHub.ts" />
     <Content Include="lib\engine\source.ts" />
     <None Include="lib\base\atom.jade" />
     <None Include="lib\base\_theme\categories.jade" />
@@ -74,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="lib\base\_src\" />
+    <Folder Include="lib\engine\site\doc\" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

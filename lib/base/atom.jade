@@ -4,7 +4,7 @@ feed(xmlns="http://www.w3.org/2005/Atom")
 	title #{config.title}
 		link(href="#{config.production_url}/atom.xml", rel="self")
 		link(href="#{config.production_url}")
-		updated
+		updated #{new Date().toISOString()}
 		id #{config.production_url}")
 		author
 			name #{config.author.name}
@@ -15,6 +15,6 @@ feed(xmlns="http://www.w3.org/2005/Atom")
 		entry
 			title #{post.header.title}
 			link(href="#{config.production_url + '/' + post.url}")
-			updated
+			updated #{post.getDate().toJSON()}
 			id #{config.production_url + '/' + post.url}
 			content(type="html") #{post.content.html}

@@ -1,30 +1,9 @@
-// **** definitions
-///<reference path='../definition/linq-2.2.d.ts'/>
+// Copyright (c) Diullei Gomes. All rights reserved. Licensed under MIT License
+// See LICENSE file in the project root for complete license information.
 
 // **** references
-///<reference path='engine/blog.ts'/>
-///<reference path='engine/source.ts'/>
-///<reference path='engine/siteFile.ts'/>
-///<reference path='engine/pageBase.ts'/>
-///<reference path='engine/page.ts'/>
-///<reference path='engine/siteHub.ts'/>
 ///<reference path='engine/main.ts'/>
 
-// **** imports
-var ncp = require('ncp').ncp;
-var jade = require('jade');
-var fs = require('fs');
-var fs2 = require('./libs/node-fs');
-var fs3 = require('./libs/fs.removeRecursive');
-var Showdown = require('./libs/showdown.js');
-var Enumerable = require('./libs/linq');
+var dateFormat = require('./libs/dateFormat');
 
-// **** declarations
-declare var process: any;
-declare var __dirname: any;
-
-// **** configurations
-ncp.limit = 16;
-
-// **** boot
 Main.run();
