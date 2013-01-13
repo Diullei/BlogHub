@@ -21,7 +21,7 @@ var Blog = (function () {
 var Site;
 (function (Site) {
     var SiteFile = (function () {
-        function SiteFile(file, blog, config) {
+        function SiteFile(file, config) {
             this.fs = require('fs');
             this.BREAK_LINE = '\n';
             this.header = {
@@ -29,7 +29,7 @@ var Site;
             var lines = null;
             var fileContent = null;
             try  {
-                fileContent = this.fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, config['file_encode']);
+                fileContent = this.fs.readFileSync('./' + config['folders']['content'] + '/' + file, config['file_encode']);
             } catch (err) {
                 console.error("There was an error opening the file:");
                 console.log(err);
@@ -84,8 +84,7 @@ var Source = (function () {
 var Site;
 (function (Site) {
     var SiteBase = (function () {
-        function SiteBase(blog, config, siteHub) {
-            this.blog = blog;
+        function SiteBase(config, siteHub) {
             this.config = config;
             this.siteHub = siteHub;
             this.fs = require('fs');
@@ -97,16 +96,17 @@ var Site;
                 this.group = this.siteFile.header['group'];
             }
         };
-        SiteBase.prototype.outName = function () {
-            return this.blog.buildRelatovePathName(this);
+        SiteBase.prototype.relatovePathName = function () {
+            throw new Error('outName not implemented!');
+            return '';
         };
         SiteBase.prototype.build = function () {
-            this.url = this.outName().substr(this.config['folders']['site'].length + 1);
+            this.url = this.relatovePathName().substr(this.config['folders']['site'].length + 1);
         };
         SiteBase.prototype.getSource = function () {
             var fileContent = null;
             try  {
-                fileContent = this.fs.readFileSync(this.blog.path + '/' + this.config['folders']['theme'] + '/' + this.config['template']['default'], this.config['file_encode']);
+                fileContent = this.fs.readFileSync('./' + this.config['folders']['theme'] + '/' + this.config['template']['default'], this.config['file_encode']);
             } catch (err) {
                 console.error("There was an error opening the file:");
                 console.log(err);
@@ -118,7 +118,7 @@ var Site;
                 main: this.siteHub,
                 page: this,
                 config: this.config
-            }), this.blog.path + this.outName());
+            }), './' + this.relatovePathName());
         };
         return SiteBase;
     })();
@@ -134,7 +134,7 @@ var Site;
     var Page = (function (_super) {
         __extends(Page, _super);
         function Page(file, blog, config, siteHub) {
-                _super.call(this, blog, config, siteHub);
+                _super.call(this, config, siteHub);
             this.file = file;
             this.showdown = require('./libs/showdown.js');
             this.MATCH = /^(.+\/)*(\d{4}-\d{2}-\d{2})-(.*)(\.[^.]+)$/g;
@@ -163,7 +163,7 @@ var Site;
             this.parserSiteData();
         }
         Page.prototype.parserSiteData = function () {
-            this.siteFile = new Site.SiteFile(this.file, this.blog, this.config);
+            this.siteFile = new Site.SiteFile(this.file, this.config);
             _super.prototype.parserSiteData.call(this);
             for(var key in this.siteFile.header) {
                 if(key == 'title') {
@@ -194,6 +194,20 @@ var Site;
         };
         Page.prototype.getDate = function () {
             return new Date(this.date.y, this.date.m - 1, this.date.d);
+        };
+        Page.prototype.relatovePathName = function () {
+            var result = '/' + this.config['folders']['site'] + '/';
+            var parts = this.config['folders']['relativePath'].split('/');
+            for(var i = 0; i < parts.length; i++) {
+                if(parts[i] && parts[i].substr(1).trim() != '') {
+                    var p = eval('this.' + parts[i].substr(1));
+                    if(p) {
+                        result += p;
+                    }
+                    result += '/';
+                }
+            }
+            return result;
         };
         return Page;
     })(Site.SiteBase);

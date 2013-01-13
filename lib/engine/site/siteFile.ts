@@ -15,11 +15,11 @@ module Site {
         public header: Object = {};
         public content: string;
 
-        constructor(file: string, blog: Blog, config: Object) {
+        constructor(file: string, config: Object) {
             var lines = null;
             var fileContent = null;
             try {
-                fileContent = this.fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, config['file_encode']);
+                fileContent = this.fs.readFileSync('./' + config['folders']['content'] + '/' + file, config['file_encode']);
             }
             catch (err) {
                 console.error("There was an error opening the file:");

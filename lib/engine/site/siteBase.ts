@@ -17,7 +17,7 @@ module Site {
         group: string = 'default';
         url: string;
 
-        constructor(public blog: Blog, public config: Object, public siteHub: SiteHub) {
+        constructor(public config: Object, public siteHub: SiteHub) {
         }
 
         parserSiteData() {
@@ -26,18 +26,19 @@ module Site {
             }
         }
 
-        public outName() {
-            return this.blog.buildRelatovePathName(this);
+        public relatovePathName() {
+            throw new Error('Site.outName() not implemented!');
+            return '';
         }
 
         public build() {
-            this.url = this.outName().substr(this.config['folders']['site'].length + 1);
+            this.url = this.relatovePathName().substr(this.config['folders']['site'].length + 1);
         }
 
         public getSource(): Source {
             var fileContent = null;
             try {
-                fileContent = this.fs.readFileSync(this.blog.path + '/' + this.config['folders']['theme'] + '/' + this.config['template']['default'], this.config['file_encode']);
+                fileContent = this.fs.readFileSync('./' + this.config['folders']['theme'] + '/' + this.config['template']['default'], this.config['file_encode']);
             }
             catch (err) {
                 console.error("There was an error opening the file:");
@@ -46,7 +47,7 @@ module Site {
 
             var render = this.jade.compile(fileContent, { filename: this.config['folders']['theme'] + '/tmpl' });
 
-            return new Source(render({ main: this.siteHub, page: this, config: this.config }), this.blog.path + this.outName());
+            return new Source(render({ main: this.siteHub, page: this, config: this.config }), './' + this.relatovePathName());
         }
     }
 }

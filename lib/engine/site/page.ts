@@ -31,7 +31,7 @@ module Site {
         public name: string;
 
         constructor(public file: string, blog: Blog, config: Object, siteHub: SiteHub) {
-            super(blog, config, siteHub);
+            super(config, siteHub);
 
             if (!this.file) {
                 throw new Error('site file name cant be null');
@@ -47,7 +47,7 @@ module Site {
         }
 
         private parserSiteData() {
-            this.siteFile = new SiteFile(this.file, this.blog, this.config);
+            this.siteFile = new SiteFile(this.file, this.config);
 
             super.parserSiteData();
 
@@ -85,5 +85,21 @@ module Site {
         public getDate() {
             return new Date(this.date.y, this.date.m - 1, this.date.d);
         }
+
+	    public relatovePathName() {
+		    var result = '/' + this.config['folders']['site'] + '/';
+		    var parts = this.config['folders']['relativePath'].split('/');
+		    for(var i = 0; i<parts.length; i++) {
+			    if(parts[i] && parts[i].substr(1).trim() != '') {
+				    var p = eval('this.' + parts[i].substr(1));
+				    if(p) {
+					    result += p;
+				    }
+				
+				    result += '/';
+			    }
+		    }
+		    return result;
+	    }
     }
 }

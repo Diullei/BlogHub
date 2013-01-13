@@ -85,8 +85,12 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>tsc $(ProjectDir)lib/blogHub.ts --out $(ProjectDir)bin/main.js
-tsc $(ProjectDir)lib/base/_plugins/GroupPaginator/main.ts</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>tsc $(ProjectDir)lib/blogHub.ts --out $(ProjectDir)bin/main.js
+tsc $(ProjectDir)lib/base/_plugins/GroupPaginator/main.ts</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
