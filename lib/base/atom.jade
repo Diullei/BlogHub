@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+feed(xmlns="http://www.w3.org/2005/Atom")
+
+	title #{config.title}
+		link(href="#{config.production_url}/atom.xml", rel="self")
+		link(href="#{config.production_url}")
+		updated
+		id #{config.production_url}")
+		author
+			name #{config.author.name}
+			email #{config.author.email}
+
+	- for(var i = 0; i < main.pages.length; i++)
+		- var post = main.pages[i];
+		entry
+			title #{post.header.title}
+			link(href="#{config.production_url + '/' + post.url}")
+			updated
+			id #{config.production_url + '/' + post.url}
+			content(type="html") #{post.content.html}

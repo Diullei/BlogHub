@@ -1,6 +1,6 @@
 class PageBase {
 	siteFile: SiteFile;
-	group: string = '';
+	group: string = 'default';
 	url: string;
 	
 	constructor(public blog: Blog, public config: Object, public siteHub: SiteHub) {
@@ -23,15 +23,15 @@ class PageBase {
 	public getSource(): Source {
 		var fileContent = null;
 		try {
-		  fileContent = fs.readFileSync(this.blog.path + '/' + this.config['folders']['theme'] + '/' + this.config['template']['default'], 'utf8');
+		  fileContent = fs.readFileSync(this.blog.path + '/' + this.config['folders']['theme'] + '/' + this.config['template']['default'], this.config['file_encode']);
 		}
 		catch (err) {
 		  console.error("There was an error opening the file:");
 		  console.log(err);
 		}
 
-		var render = jade.compile(fileContent);
+		var render = jade.compile(fileContent, {filename: this.config['folders']['theme'] + '/tmpl'});
 
-		return new Source(render( { main: this.siteHub, page: this } ), this.blog.path + this.outName());
+		return new Source(render( { main: this.siteHub, page: this, config: this.config } ), this.blog.path + this.outName());
 	}
 }

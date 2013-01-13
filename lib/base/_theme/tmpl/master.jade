@@ -1,0 +1,49 @@
+!!!
+html(lang="en")
+	head
+		meta(charset="utf-8")
+		title 
+			block title
+		meta(name="author", content="#{config.author.name}")
+		meta(name='viewport', content='width=device-width, initial-scale=1.0')
+		link(rel='stylesheet', href='/css/bootstrap-responsive.min.css')
+		link(rel='stylesheet', href='/css/bootstrap.min.css')
+		link(rel='stylesheet', href='/css/style.css')
+		script(src='//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js')
+		style(type='text/css')
+			body { padding-top: 40px; padding-bottom: 40px; }
+			.sidebar-nav { padding: 9px 0; } 
+		
+	body
+		div.navbar.navbar-inverse.navbar-fixed-top
+			div.navbar-inner
+				div.container
+					a(href="/").brand #{config.author.name}
+					div.nav-collapse.collapse
+						ul.nav
+							li
+								a(href="/categories.html") Categories
+							li
+								a(href="/pages.html") Pages
+							li
+								a(href="/tags.html") Tags
+							li
+								a(href="/archive.html") Archive
+
+		div.container
+			div.content
+
+				//  ================== 
+
+				div.page-header
+					h1 
+						block header
+
+				div.row
+					block content
+
+			//  ================== 
+
+			footer
+				p &copy; #{config.author.name} 2013 with help from 
+					a(href="https://github.com/Diullei/BlogHub", target="_blank", title="BlogHub - NodeJS site engine") BlogHub

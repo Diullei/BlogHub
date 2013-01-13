@@ -8,7 +8,7 @@ class SiteFile {
 		var lines = null;
 		var fileContent = null;
 		try {
-		  fileContent = fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, 'utf8');
+		  fileContent = fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, config['file_encode']);
 		}
 		catch (err) {
 		  console.error("There was an error opening the file:");
@@ -22,6 +22,7 @@ class SiteFile {
 		for(var i = 0; i < lines.length; i++) {
 			var line = lines[i].trim();
 			if(line != '' && line != '---' && !openHeader) {
+                console.log(line)
 				throw new Error('invalid site header file');
 			} else if(line == '---') {
 				if(!openHeader) {

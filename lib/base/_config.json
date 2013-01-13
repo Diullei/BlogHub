@@ -10,8 +10,9 @@
 		"basePath": false,
 		"tmp_comment": "file:///C:/Users/dgomes/Documents/GitHub/BlogHub/temp/_site/"
 	},
+	"file_encode":"utf8",
 	"template": {
-		"default": "index.html"
+		"default": "tmpl/post.jade"
 	},
 	"title": "Diullei Gomes",
 	"tagLine": "JavaScript Development",
@@ -22,5 +23,5 @@
 		"twitter": "diullei"
 	},
 	"url": "http://current.url",
-	"home": "Test1/2012/09/30/Introducao-ao-TypeScript"
+	"home": "default"
 }

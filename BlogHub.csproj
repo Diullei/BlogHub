@@ -31,6 +31,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="definition\linq-2.2.d.ts" />
+    <Content Include="lib\base\_theme\css\bootstrap-responsive.css" />
+    <Content Include="lib\base\_theme\css\bootstrap-responsive.min.css" />
+    <Content Include="lib\base\_theme\css\bootstrap.css" />
+    <Content Include="lib\base\_theme\css\bootstrap.min.css" />
+    <Content Include="lib\base\_theme\css\style.css" />
+    <Content Include="lib\base\_theme\img\glyphicons-halflings-white.png" />
+    <Content Include="lib\base\_theme\img\glyphicons-halflings.png" />
+    <Content Include="lib\base\_theme\js\bootstrap.js" />
+    <Content Include="lib\base\_theme\js\bootstrap.min.js" />
     <Content Include="lib\blogHub.ts" />
     <Content Include="lib\engine\blog.ts" />
     <Content Include="lib\engine\main.ts" />
@@ -39,10 +48,16 @@
     <Content Include="lib\engine\siteFile.ts" />
     <Content Include="lib\engine\siteHub.ts" />
     <Content Include="lib\engine\source.ts" />
-    <Content Include="lib\base\atom.xml" />
-    <Content Include="lib\base\_theme\index.html" />
+    <None Include="lib\base\atom.jade" />
+    <None Include="lib\base\_theme\categories.jade" />
+    <None Include="lib\base\_theme\pages.jade" />
+    <None Include="lib\base\_theme\tags.jade" />
+    <None Include="lib\base\_theme\tmpl\post.jade" />
+    <None Include="lib\base\_theme\inc\footer.jade" />
+    <None Include="lib\base\_theme\inc\header.jade" />
+    <None Include="lib\base\_theme\inc\scripts.jade" />
     <Content Include="lib\base\_plugins\GroupPaginator\main.ts" />
-    <Content Include="lib\base\_plugins\GroupPaginator\template.html" />
+    <None Include="lib\base\_plugins\GroupPaginator\template.jade" />
     <Content Include="test\files\blog\templates\index.html" />
     <Content Include="test\site_test.ts" />
   </ItemGroup>
@@ -54,6 +69,7 @@
     <None Include="lib\base\_content\2012-09-30-Introducao-ao-TypeScript.md" />
     <None Include="lib\base\_content\2012-10-01-JavaScript-NoConflict.md" />
     <None Include="lib\base\_content\2012-11-11-Lendo-arquivos-com-Nodejs.md" />
+    <None Include="lib\base\_theme\tmpl\master.jade" />
     <None Include="test\files\blog\2013-01-05-site-name.md" />
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,32 @@
+﻿extends tmpl/master
+
+block title
+	| Tags
+
+block header
+	| Tags
+
+block content
+	div.span12
+		- var tags = {};
+		- for (var i = 0; i < main.pages.length; i++)
+			- var page = main.pages[i];
+			- if (page.header.tags.length > 0)
+				- for (var j = 0; j < page.header.tags.length; j++)
+					- var tag = page.header.tags[j];
+					- if (!tags[tag])
+						- tags[tag] = [];
+					- tags[tag].push(page);
+
+		ul.tag_box.inline
+			- for (var tag in tags)
+				li
+					a(href="/tags.html##{tag}-ref") #{tag} &nbsp;
+						span #{tags[tag].length}
+		
+		- for (var tag in tags)
+			h2(id="#{tag}-ref") #{tag}
+			ul
+				-for (var i = 0; i < tags[tag].length; i++)
+					li
+						a(href="#") #{tags[tag][i].header.title}

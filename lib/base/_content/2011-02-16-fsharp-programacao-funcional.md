@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 category : lessons
 title: "F# - A Programação Funcional"

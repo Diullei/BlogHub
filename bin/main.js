@@ -23,9 +23,13 @@ var Source = (function () {
         this.content = content;
         this.path = path;
     }
-    Source.prototype.save = function () {
+    Source.prototype.save = function (encode) {
         fs2.mkdirSync(this.path, 777, true);
-        fs.writeFileSync(this.path + 'index.html', this.content, 'utf8');
+        fs.writeFileSync(this.path + 'index.html', this.content, encode);
+    };
+    Source.prototype.saveToPath = function (path, fileName, encode) {
+        fs2.mkdirSync(path, 777, true);
+        fs.writeFileSync(path + '/' + fileName, this.content, encode);
     };
     return Source;
 })();
@@ -37,7 +41,7 @@ var SiteFile = (function () {
         var lines = null;
         var fileContent = null;
         try  {
-            fileContent = fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, 'utf8');
+            fileContent = fs.readFileSync(blog.path + '/' + config['folders']['content'] + '/' + file, config['file_encode']);
         } catch (err) {
             console.error("There was an error opening the file:");
             console.log(err);
@@ -47,6 +51,7 @@ var SiteFile = (function () {
         for(var i = 0; i < lines.length; i++) {
             var line = lines[i].trim();
             if(line != '' && line != '---' && !openHeader) {
+                console.log(line);
                 throw new Error('invalid site header file');
             } else {
                 if(line == '---') {
@@ -74,7 +79,7 @@ var PageBase = (function () {
         this.blog = blog;
         this.config = config;
         this.siteHub = siteHub;
-        this.group = '';
+        this.group = 'default';
     }
     PageBase.prototype.parserSiteData = function () {
         if(this.siteFile.header['group']) {
@@ -90,15 +95,18 @@ var PageBase = (function () {
     PageBase.prototype.getSource = function () {
         var fileContent = null;
         try  {
-            fileContent = fs.readFileSync(this.blog.path + '/' + this.config['folders']['theme'] + '/' + this.config['template']['default'], 'utf8');
+            fileContent = fs.readFileSync(this.blog.path + '/' + this.config['folders']['theme'] + '/' + this.config['template']['default'], this.config['file_encode']);
         } catch (err) {
             console.error("There was an error opening the file:");
             console.log(err);
         }
-        var render = jade.compile(fileContent);
+        var render = jade.compile(fileContent, {
+            filename: this.config['folders']['theme'] + '/tmpl'
+        });
         return new Source(render({
             main: this.siteHub,
-            page: this
+            page: this,
+            config: this.config
         }), this.blog.path + this.outName());
     };
     return PageBase;
@@ -175,6 +183,7 @@ var SiteHub = (function () {
         this.pages = [];
         this.plugins = {
         };
+        this.groups = [];
         this.blog = new Blog('.');
     }
     SiteHub.prototype.renderPlugin = function (plugin, main, page) {
@@ -201,26 +210,57 @@ var SiteHub = (function () {
     };
     SiteHub.prototype.loadPages = function () {
         var files = fs.readdirSync(this.config['folders']['content']);
-        ; ;
         if(files.length > 0) {
+            files = Enumerable.From(files).Reverse().ToArray();
             for(var i = 0; i < files.length; i++) {
                 var page = new Page(files[i], this.blog, this.config, this);
                 this.pages.push(page);
             }
         }
     };
+    SiteHub.prototype.getPage = function (page) {
+        var fileContent = null;
+        try  {
+            fileContent = fs.readFileSync(page, this.config['file_encode']);
+        } catch (err) {
+            console.error("There was an error opening the file:");
+            console.log(err);
+        }
+        var render = jade.compile(fileContent, {
+            filename: this.config['folders']['theme'] + '/tmpl'
+        });
+        return new Source(render({
+            main: this,
+            config: this.config
+        }), this.config['folders']['site']);
+    };
+    SiteHub.prototype.getAtom = function () {
+        var fileContent = null;
+        try  {
+            fileContent = fs.readFileSync('./atom.jade', this.config['file_encode']);
+        } catch (err) {
+            console.error("There was an error opening the file:");
+            console.log(err);
+        }
+        var render = jade.compile(fileContent, {
+            filename: this.config['folders']['theme'] + '/tmpl'
+        });
+        return new Source(render({
+            main: this,
+            config: this.config
+        }), this.config['folders']['site'] + '/atom.xml');
+    };
     SiteHub.prototype.loadGroups = function () {
-        var groups = [];
         if(this.pages.length > 0) {
             for(var i = 0; i < this.pages.length; i++) {
                 var page = this.pages[i];
-                if(!groups[page.group]) {
-                    groups[page.group] = [];
+                if(!this.groups[page.group]) {
+                    this.groups[page.group] = [];
                 }
-                groups[page.group].push(page);
+                this.groups[page.group].push(page);
             }
-            for(var key in groups) {
-                var group = groups[key];
+            for(var key in this.groups) {
+                var group = this.groups[key];
                 for(var k = 0; k < group.length; k++) {
                     if(k > 0) {
                         group[k].previous = group[k - 1];
@@ -242,9 +282,44 @@ var SiteHub = (function () {
                 this.pages[i].build();
             }
             fs3.removeRecursive(this.blog.path + '/' + this.config['folders']['site'], function (err, status) {
-                for(var i = 0; i < _this.pages.length; i++) {
-                    _this.pages[i].getSource().save();
+                var itens = fs.readdirSync(_this.blog.path + '/' + _this.config['folders']['theme']);
+                for(var i = 0; i < itens.length; i++) {
+                    if(itens[i].substr(itens[i].lastIndexOf('.')).toUpperCase() == '.JADE') {
+                        if(itens[i].toUpperCase() == 'INDEX.JADE') {
+                            if(!_this.config['home']) {
+                                console.log('!home');
+                                _this.getPage(_this.blog.path + '/' + _this.config['folders']['theme'] + '/' + itens[i]).saveToPath(_this.config['folders']['site'], '/index.html', _this.config['file_encode']);
+                            }
+                        } else {
+                            console.log(itens[i]);
+                            _this.getPage(_this.blog.path + '/' + _this.config['folders']['theme'] + '/' + itens[i]).saveToPath(_this.config['folders']['site'], '/' + itens[i].substr(0, itens[i].lastIndexOf('.')) + '.html', _this.config['file_encode']);
+                        }
+                    }
                 }
+                if(_this.config['home']) {
+                    var group = _this.groups[_this.config['home']];
+                    var source = group[0].getSource();
+                    source.saveToPath(_this.blog.path + '/' + _this.config['folders']['site'], 'index.html', _this.config['file_encode']);
+                }
+                _this.getAtom().saveToPath(_this.blog.path + '/' + _this.config['folders']['site'], 'atom.xml', _this.config['file_encode']);
+                for(var i = 0; i < _this.pages.length; i++) {
+                    _this.pages[i].getSource().save(_this.config['file_encode']);
+                }
+                ncp(_this.blog.path + '/' + _this.config['folders']['theme'] + '/css', _this.blog.path + '/' + _this.config['folders']['site'] + '/css', function (err) {
+                    if(err) {
+                        return console.error(err);
+                    }
+                });
+                ncp(_this.blog.path + '/' + _this.config['folders']['theme'] + '/img', _this.blog.path + '/' + _this.config['folders']['site'] + '/img', function (err) {
+                    if(err) {
+                        return console.error(err);
+                    }
+                });
+                ncp(_this.blog.path + '/' + _this.config['folders']['theme'] + '/js', _this.blog.path + '/' + _this.config['folders']['site'] + '/js', function (err) {
+                    if(err) {
+                        return console.error(err);
+                    }
+                });
             });
         }
     };

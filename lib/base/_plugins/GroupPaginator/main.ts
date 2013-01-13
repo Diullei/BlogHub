@@ -6,25 +6,17 @@ var fs = require('fs');
 
 declare var exports: any;
 
-var out = '';
-
-exports.render = function (main, page) {
-    //return 'xxxxxxxxxxxxxxxxxxxxxxxxx';
+exports.render = function (main, page, config) {
 	var fileContent = null;
 	try {
-		fileContent = fs.readFileSync(main.config['folders']['plugins'] + '/GroupPaginator/template.html', 'binary');
-        //fileContent = fs.readFileSync('template.html', 'binary');
+		fileContent = fs.readFileSync(main.config['folders']['plugins'] + '/GroupPaginator/template.jade', main.config['file_encode']);
 	}
 	catch (err) {
 		console.error("There was an error opening the file:");
 		console.log(err);
 	}
 	
-	//return fileContent;
-
 	var fn = jade.compile(fileContent);
 
-	return fn({main: main, page: page});
+	return fn({main: main, page: page, config: config});
 };
-
-//exports.result = out;
