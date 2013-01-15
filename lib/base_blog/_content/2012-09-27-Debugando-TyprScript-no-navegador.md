@@ -1,4 +1,6 @@
 ---
+engine: blog
+template: tmpl/post.jade
 title: Debugando-TyprScript-no-navegador
 category: Test1
 tags: categ1, categ2

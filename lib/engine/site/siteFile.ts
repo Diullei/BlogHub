@@ -4,10 +4,8 @@
 // **** definitions
 ///<reference path='../../../definition/node-0.8.d.ts'/>
 
-// **** references
-///<reference path='blog/blog.ts'/>
-
 module Site {
+
     export class SiteFile {
         private fs = require('fs');
         private BREAK_LINE = '\n';

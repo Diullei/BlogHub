@@ -1,4 +1,4 @@
-extends tmpl/master
+﻿extends tmpl/master
 
 block title
 	| #{page.header.title}
@@ -10,7 +10,7 @@ block content
 	div.span12
 
 		h2.post_title
-			a(href="#") #{page.getDate().format('dd/mm/yyyy')} - #{page.header.title}
+			a(href="#") #{page.date.asDateObject().format('dd/mm/yyyy')} - #{page.header.title}
 		hr
 		!{page.content.html}
 		hr
@@ -20,7 +20,7 @@ block content
 			- if (main.pages.length > 0)
 				- var max = (main.pages.length < 3 ? main.pages.length : 3);
 				- for (var i = 0; i < max; i++)
-					li #{main.pages[i].getDate().format('dd/mm/yyyy')} » 
+					li #{main.pages[i].date.asDateObject().format('dd/mm/yyyy')} » 
 						a(href='#{(config.folders.basePath ? config.folders.basePath : '' ) 
 							+ main.pages[i].url
 							+ (config.folders.basePath ? 'index.html' : '' )}', title=main.pages[i].title) #{main.pages[i].header.title}

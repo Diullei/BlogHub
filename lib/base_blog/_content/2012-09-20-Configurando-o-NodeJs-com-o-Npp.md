@@ -1,4 +1,6 @@
 ---
+engine: blog
+template: tmpl/post.jade
 title: Configurando-o-NodeJs-com-o-Npp
 category: Test1
 tags: categ1, categ2, categ3

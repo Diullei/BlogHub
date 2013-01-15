@@ -3,7 +3,13 @@
 
 // **** references
 ///<reference path='engine/main.ts'/>
+///<reference path='engine/print.ts'/>
 
-var dateFormat = require('./libs/dateFormat');
+require('./libs/dateFormat');
 
-Main.run();
+try { 
+    var main = new Main();
+    main.batchCompile();
+} catch (e) { 
+    Print.out(e.message);
+}

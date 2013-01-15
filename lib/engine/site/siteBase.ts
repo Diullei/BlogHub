@@ -9,21 +9,24 @@
 ///<reference path='../source.ts'/>
 
 module Site {
+
     export class SiteBase {
         private fs = require('fs');
         private jade = require('jade');
 
-        siteFile: SiteFile;
-        group: string = 'default';
-        url: string;
+        public showdown = require('./libs/showdown.js');
+        public name: string;
+        public url: string;
 
-        constructor(public config: Object, public siteHub: SiteHub) {
+        constructor(public config: Object, public siteHub: SiteHub, public siteFile: SiteFile, public file: string) {
+            if (!this.file) {
+                throw new Error('site file name cant be null');
+            }
+            this.name = file.substring(0, file.lastIndexOf('.'));
         }
 
-        parserSiteData() {
-            if (this.siteFile.header['group']) {
-                this.group = this.siteFile.header['group'];
-            }
+        public parserSiteData() {
+            //...
         }
 
         public relatovePathName() {
@@ -38,7 +41,7 @@ module Site {
         public getSource(): Source {
             var fileContent = null;
             try {
-                fileContent = this.fs.readFileSync('./' + this.config['folders']['theme'] + '/' + this.config['template']['default'], this.config['file_encode']);
+                fileContent = this.fs.readFileSync('./' + this.config['folders']['theme'] + '/' + (this.siteFile.header['template']), this.config['file_encode']);
             }
             catch (err) {
                 console.error("There was an error opening the file:");

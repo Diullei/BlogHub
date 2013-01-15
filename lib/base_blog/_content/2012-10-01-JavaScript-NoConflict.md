@@ -1,4 +1,6 @@
 ---
+engine: blog
+template: tmpl/post.jade
 title: JavaScript-NoConflict
 category: Test2
 tags: categ1, bldre

@@ -6,38 +6,88 @@
 
 // **** references
 ///<reference path='site/siteHub.ts'/>
+///<reference path='optionsParser.ts'/>
+
+class FolderNotEmptyException implements Error { 
+    public name: string;
+    public message: string;
+
+    constructor() { 
+        this.message = "Error! this folder is not empty.\n";
+    }
+}
+
+class CreateSiteTypeException implements Error { 
+    public name: string;
+    public message: string;
+
+    constructor() { 
+        this.message = "Error! Invalid create site argument.\n";
+    }
+}
 
 class Main {
-    private static ncp = require('ncp').ncp;
-    private static fs = require('fs');
+    private fs = require('fs');
 
-    public static createSite() { 
-        console.log('creating new site...');
+    public batchCompile() {
+        var opts = new OptionsParser();
 
-        var itens = this.fs.readdirSync("./");
-        if (itens.length > 0) {
-            console.log('Error! this folder is not empty.');
-        } else {
-            this.ncp(__dirname + '/../lib/base/', "./", function (err) {
-                if (err) {
-                    return console.error(err);
-                }
-                console.log('site created!');
-            });
+        opts.option('new', {
+            usage: 'Create a new site source (examples --new blog)',
+            experimental: false,
+            set: (str) => {
+                this.newSite(str);
+            }
+        }, 'n');
+
+        opts.option('build', {
+            usage: 'build the site',
+            set: () => {
+                this.buildSite()
+            }
+        }, 'b');
+
+        opts.flag('help', {
+            usage: 'Print this message',
+            set: () => {
+                opts.printUsage();
+            }
+        }, 'h');
+
+        opts.parse(process.argv.slice(2));
+
+        for (var i = 0; i < opts.unnamed.length; i++) {
+            throw new OptionsParserException(opts.unnamed[i]);
+        }
+
+        if (opts.length == 0) { 
+            opts.printUsage();
         }
     }
 
-	public static build() {
-		new Site.SiteHub().build();
-	}
+    public buildSite() { 
+        new Site.SiteHub().build();
+    }
 
-	public static run() { 
-        var arg1 = process.argv[2];
+    public isFolderEmpty() { 
+        var itens = this.fs.readdirSync("./");
+        return itens.length == 0;
+    }
 
-        if (!arg1) {
-            Main.build();
-        } if (arg1 == 'new') {
-            Main.createSite();
+    public newSite(type: string) { 
+        if(!type)
+            throw new CreateSiteTypeException();
+
+        if (!this.isFolderEmpty()) {
+            throw new FolderNotEmptyException();
+        }
+
+        switch (type) { 
+            case "blog":
+                new Site.Blog.Builder().exec();
+            break;
+            default:
+                throw new CreateSiteTypeException();
         }
     }
 }

@@ -1,7 +1,9 @@
 ---
+engine: blog
+template: tmpl/post.jade
 title: Lendo-arquivos-com-Nodejs
 category: Test2
-tags: bldre, hjui, ddd
+tags: JavaScript, CoffeeScript, Ruby
 ---
 
 Existem algumas formas diferentes de ler arquivos usando node.js. Existem métodos síncronos e métodos assíncronos que nos permitem realizar este trabalho. Vou exibir e explicar estas diversas formas no decorrer deste post.

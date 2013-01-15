@@ -5,9 +5,10 @@
 ///<reference path='../../../definition/node-0.8.d.ts'/>
 
 // **** references
-///<reference path='page.ts'/>
+///<reference path='blog/blogPage.ts'/>
 
 module Site {
+
     export class SiteHub {
         private fs = require('fs');
         private jade = require('jade');
@@ -16,13 +17,10 @@ module Site {
         private ncp = require('ncp').ncp;
 
         config: string;
-        pages: Page[] = [];
-        blog: Blog;
+        pages: Site.SiteBase[] = [];
         plugins: any = {};
-        groups: any[] = [];
 
         constructor() {
-            this.blog = new Blog('.');
         }
 
         public renderPlugin(plugin, main, page) {
@@ -58,8 +56,19 @@ module Site {
                 files = this.enumerable.From(files).Reverse().ToArray();
 
                 for (var i = 0; i < files.length; i++) {
-                    var page = new Page(files[i], this.blog, this.config, this);
-                    this.pages.push(page);
+                    var siteFile = new SiteFile(files[i], this.config);
+                    if (siteFile.header['engine']) {
+                        var engine = siteFile.header['engine'];
+                        if (engine == 'blog') {
+
+                            console.log(engine)
+                            var page = new Site.Blog.BlogPage(this, files[i], this.config, siteFile);
+                            this.pages.push(page);
+
+                        } else if (engine == 'doc') {
+                        } else if (engine == 'page') {
+                        }
+                    }
                 }
             }
         }
@@ -94,86 +103,49 @@ module Site {
             return new Source(render({ main: this, config: this.config }), this.config['folders']['site'] + '/atom.xml');
         }
 
-        private loadGroups() {
-            if (this.pages.length > 0) {
-                for (var i = 0; i < this.pages.length; i++) {
-                    var page = this.pages[i];
-
-                    if (!this.groups[page.group]) {
-                        this.groups[page.group] = [];
-                    }
-
-                    this.groups[page.group].push(page);
-                }
-
-                for (var key in this.groups) {
-                    var group = this.groups[key];
-
-                    for (var k = 0; k < group.length; k++) {
-                        if (k > 0) {
-                            group[k].previous = group[k - 1];
-                        }
-                        if (k < group.length) {
-                            group[k].next = group[k + 1];
-                        }
-                    }
+        public getJadePages(): string[] {
+            var pages: string[] = [];
+            var itens = this.fs.readdirSync('./' + this.config['folders']['theme']);
+            for (var i = 0; i < itens.length; i++) {
+                if (itens[i].substr(itens[i].lastIndexOf('.')).toUpperCase() == '.JADE') {
+                    pages.push(itens[i]);
                 }
             }
+            return pages;
         }
 
         public build() {
             this.loadConfig();
             this.loadPages();
-            this.loadGroups();
 
             if (this.pages.length > 0) {
                 for (var i = 0; i < this.pages.length; i++) {
                     this.pages[i].build();
                 }
 
-                this.fs3.removeRecursive(this.blog.path + '/' + this.config['folders']['site'], (err, status) => {
+                this.fs3.removeRecursive('./' + this.config['folders']['site'], (err, status) => {
 
-                    var itens = this.fs.readdirSync(this.blog.path + '/' + this.config['folders']['theme']);
+                    var itens = this.getJadePages();
                     for (var i = 0; i < itens.length; i++) {
-                        if (itens[i].substr(itens[i].lastIndexOf('.')).toUpperCase() == '.JADE') {
-
-                            if (itens[i].toUpperCase() == 'INDEX.JADE') {
-                                if (!this.config['home']) {
-                                    // custom pages
-                                    console.log('!home')
-                                    this.getPage(this.blog.path + '/' + this.config['folders']['theme'] + '/' + itens[i]).saveToPath(
-                                        this.config['folders']['site'],
-                                        '/index.html',
-                                        this.config['file_encode']);
-                                }
-                            } else {
-                                console.log(itens[i])
-                                this.getPage(this.blog.path + '/' + this.config['folders']['theme'] + '/' + itens[i]).saveToPath(
-                                    this.config['folders']['site'],
-                                    '/' + itens[i].substr(0, itens[i].lastIndexOf('.')) + '.html',
-                                    this.config['file_encode']);
-                            }
-                        }
+                        console.log(itens[i])
+                        this.getPage('./' + this.config['folders']['theme'] + '/' + itens[i]).saveToPath(
+                            this.config['folders']['site'],
+                            '/' + itens[i].substr(0, itens[i].lastIndexOf('.')) + '.html',
+                            this.config['file_encode']);
                     }
 
-                    if (this.config['home']) {
-                        // index
-                        var group = this.groups[this.config['home']];
-                        var source = group[0].getSource();
-                        source.saveToPath(this.blog.path + '/' + this.config['folders']['site'], 'index.html', this.config['file_encode']);
-                    }
-
-                    this.getAtom().saveToPath(this.blog.path + '/' + this.config['folders']['site'], 'atom.xml', this.config['file_encode']);
+                    this.getAtom().saveToPath('./' + this.config['folders']['site'], 'atom.xml', this.config['file_encode']);
 
                     // pages
                     for (var i = 0; i < this.pages.length; i++) {
                         this.pages[i].getSource().save(this.config['file_encode']);
                     }
 
-                    // deve ir para configuração do tema definindo o que deve ser ou não copiado
-                    this.ncp(this.blog.path + '/' + this.config['folders']['theme'] + '/css', this.blog.path + '/' + this.config['folders']['site'] + '/css', function (err) { if (err) { return console.error(err); } });
-                    this.ncp(this.blog.path + '/' + this.config['folders']['theme'] + '/img', this.blog.path + '/' + this.config['folders']['site'] + '/img', function (err) { if (err) { return console.error(err); } });
-                    this.ncp(this.blog.path + '/' + this.config['folders']['theme'] + '/js', this.blog.path + '/' + this.config['folders']['site'] + '/js', function (err) { if (err) { return console.error(err); } });
+                    // copy folders
+                    for (var i = 0; i < this.config['exclude'].length; i++) { 
+                        var folder = this.config['exclude'][i];
+                        this.ncp('./' + this.config['folders']['theme'] + '/' + folder, './' + this.config['folders']['site'] + '/' + folder, function (err) { if (err) { return console.error(err); } });
+                    }
                 });
             }
         }

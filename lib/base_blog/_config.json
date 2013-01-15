@@ -6,14 +6,12 @@
 		"site": "_site",
 		"src": "_src",
 		"theme": "_theme",
-		"relativePath":"/:header.category/:date.y/:date.m/:date.d/:name",
 		"basePath": false,
-		"tmp_comment": "file:///C:/Users/dgomes/Documents/GitHub/BlogHub/temp/_site/"
+		"blog": {
+			"relativePath":"/:header.category/:date.y/:date.m/:date.d/:name"
+		}
 	},
 	"file_encode":"utf8",
-	"template": {
-		"default": "tmpl/post.jade"
-	},
 	"title": "Diullei Gomes",
 	"tagLine": "JavaScript Development",
 	"author": {
@@ -23,5 +21,6 @@
 		"twitter": "diullei"
 	},
 	"url": "http://current.url",
-	"home": "default"
+	"home": "default",
+	"exclude": ["css", "img", "js"]
 }

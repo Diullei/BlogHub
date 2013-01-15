@@ -1,4 +1,6 @@
 ---
+engine: blog
+template: tmpl/post.jade
 title: Introducao-ao-TypeScript
 category: Test1
 tags: categ1

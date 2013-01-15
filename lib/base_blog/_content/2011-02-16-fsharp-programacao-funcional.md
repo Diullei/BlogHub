@@ -1,10 +1,10 @@
 ---
-layout: post
+engine: blog
+template: tmpl/post.jade
 category : lessons
-title: "F# - A Programação Funcional"
-tags : [Programação Funcional, F#]
+title: F# - A Programação Funcional
+tags : Programação Funcional, F#
 ---
-{% include JB/setup %}
 
 Nos anos 40 os primeiros computadores foram construídos. Nesta época devido aos altos custos, era justificável ter uma linguagem que trabalhasse o mais próximo possível da arquitetura do computador. Ou seja, as primeiras linguagens de programação tinha como abstração o próprio hardware. Como sabemos, um computador consiste de uma unidade de processamento e memoria, então um programa era composto por instruções que modificavam a memória, executados pela unidade de processamento. Linguagens como C e Pascal foram marcados por esse estilo, chamado de programação imperativa, onde havia uma serie de atribuições executadas sequencialmente.
 
@@ -16,17 +16,17 @@ Em uma função determinística o resultado depende apenas dos seus parâmetros.
 
 O Coração da programação funcional é pensar sobre o código em termos de funções matemáticas. Considere duas funções f e g.
 
-f(x) = x^2 + x
-g(x) = x + 1
+	f(x) = x^2 + x
+	g(x) = x + 1
 
 Segue:
 
-f(2) = (2)^2 + (2)
-g(2) = (2) + 1
+	f(2) = (2)^2 + (2)
+	g(2) = (2) + 1
 
 E se você compor estas duas funções você obtém:
 
-f g (2) = f(g(2)) = (g(2))^2 + (g(2)) = (2+1)^2 + (2+1) = 12
+	f g (2) = f(g(2)) = (g(2))^2 + (g(2)) = (2+1)^2 + (2+1) = 12
 
 Você não precisa ser um matemático para programar em F#, mas algumas ideias matemáticas se traduzem quase que diretamente para programação funcional. No exemplo anterior, não existem um tipo de retorno especificado. f(x) recebe um integer ou um float? Esta notação matemática não se preocupa com tipos ou valores de retorno.
 
@@ -64,10 +64,8 @@ Facilita o paralelismo, Explorativa, Algoritimica. Extende a plataforma .NET par
 Inovou com Async, objetos facilitados, imutabilidade, tuplas e unidades de medida.
 A funções matemáticas f e g apresentadas acima escritas em código F#
 
-{% highlight fsharp %}
-let f x = x ** 2.0 + x
-let g x = x + 1.0
-{% endhighlight %}
+	let f x = x ** 2.0 + x
+	let g x = x + 1.0
 
 O fato do F# lembrar a noção matemática não é coincidência. A essência da programação funcional está em pensar sobre computações de maneira abstrata, novamente, O que é computado, e não, como é computado. Não se preocupe por enquanto sobre o entendimento da sintaxe, pois esta será abordada posteriormente.
 
