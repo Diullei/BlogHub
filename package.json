@@ -29,6 +29,7 @@
 	"dependencies" : {
 		"jade" : "latest",
 		"underscore" : "latest",
-		"ncp" : "latest"
+		"ncp" : "latest",
+		"express" : "latest"
 	}
 }

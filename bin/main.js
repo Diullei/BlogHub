@@ -572,6 +572,7 @@ var Main = (function () {
         switch(type) {
             case "blog": {
                 new Site.Blog.Builder().exec();
+                this.fs.createReadStream(__dirname + '/../lib/httpServer.js').pipe(this.fs.createWriteStream('./httpServer.js'));
                 break;
 
             }

@@ -66,6 +66,7 @@
     <None Include="lib\base_blog\_theme\inc\scripts.jade" />
     <Content Include="lib\base_blog\_plugins\GroupPaginator\main.ts" />
     <None Include="lib\base_blog\_plugins\GroupPaginator\template.jade" />
+    <Content Include="lib\httpServer.js" />
     <Content Include="test\files\blog\templates\index.html" />
     <Content Include="test\site_test.ts" />
   </ItemGroup>
