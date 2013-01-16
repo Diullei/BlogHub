@@ -643,32 +643,52 @@ var Site;
             }
             return pages;
         };
+        SiteHub.prototype.copyThemeFolders = function () {
+            for(var i = 0; i < this.config.copyFolders.length; i++) {
+                var folder = this.config.copyFolders[i];
+                this.ncp('./' + this.config.folders.theme + '/' + folder, './' + this.config.folders.site + '/' + folder, function (err) {
+                    if(err) {
+                        return console.error(err);
+                    }
+                });
+            }
+        };
+        SiteHub.prototype.saveAtom = function () {
+            this.getAtom().saveToPath('./' + this.config.folders.site, 'atom.xml', this.config.fileEncode);
+        };
+        SiteHub.prototype.buildPages = function () {
+            if(this.pages.length > 0) {
+                for(var i = 0; i < this.pages.length; i++) {
+                    this.pages[i].build();
+                }
+            }
+        };
+        SiteHub.prototype.saveMdPages = function () {
+            for(var i = 0; i < this.pages.length; i++) {
+                this.pages[i].getSource().save(this.config.fileEncode);
+            }
+        };
+        SiteHub.prototype.saveJadePages = function () {
+            var itens = this.getJadePages();
+            for(var i = 0; i < itens.length; i++) {
+                BlogHubDiagnostics.info('[Create] file: ' + itens[i]);
+                this.getPage('./' + this.config.folders.theme + '/' + itens[i]).saveToPath(this.config.folders.site, '/' + itens[i].substr(0, itens[i].lastIndexOf('.')) + '.html', this.config.fileEncode);
+            }
+        };
+        SiteHub.prototype.savePages = function () {
+            this.saveJadePages();
+            this.saveAtom();
+            this.saveMdPages();
+        };
         SiteHub.prototype.build = function () {
             var _this = this;
             this.loadPlugins();
             this.loadPages();
             if(this.pages.length > 0) {
-                for(var i = 0; i < this.pages.length; i++) {
-                    this.pages[i].build();
-                }
+                this.buildPages();
                 this.fs3.removeRecursive('./' + this.config.folders.site, function (err, status) {
-                    var itens = _this.getJadePages();
-                    for(var i = 0; i < itens.length; i++) {
-                        BlogHubDiagnostics.info('[Create] file: ' + itens[i]);
-                        _this.getPage('./' + _this.config.folders.theme + '/' + itens[i]).saveToPath(_this.config.folders.site, '/' + itens[i].substr(0, itens[i].lastIndexOf('.')) + '.html', _this.config.fileEncode);
-                    }
-                    _this.getAtom().saveToPath('./' + _this.config.folders.site, 'atom.xml', _this.config.fileEncode);
-                    for(var i = 0; i < _this.pages.length; i++) {
-                        _this.pages[i].getSource().save(_this.config.fileEncode);
-                    }
-                    for(var i = 0; i < _this.config.copyFolders.length; i++) {
-                        var folder = _this.config.copyFolders[i];
-                        _this.ncp('./' + _this.config.folders.theme + '/' + folder, './' + _this.config.folders.site + '/' + folder, function (err) {
-                            if(err) {
-                                return console.error(err);
-                            }
-                        });
-                    }
+                    _this.savePages();
+                    _this.copyThemeFolders();
                 });
             }
         };
@@ -919,7 +939,7 @@ var Main = (function () {
 })();
 require('./libs/dateFormat');
 BlogHubDiagnostics.init();
-BlogHubDiagnostics.info('Starting...');
+BlogHubDiagnostics.debug('Starting...');
 try  {
     var main = new Main();
     main.batchCompile();

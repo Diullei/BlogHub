@@ -10,7 +10,7 @@ require('./libs/dateFormat');
 
 BlogHubDiagnostics.init();
 
-BlogHubDiagnostics.info('Starting...');
+BlogHubDiagnostics.debug('Starting...');
 
 try { 
     var main = new Main();

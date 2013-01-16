@@ -109,38 +109,58 @@ module Site {
             return pages;
         }
 
+        private copyThemeFolders() { 
+            for (var i = 0; i < this.config.copyFolders.length; i++) { 
+                var folder = this.config.copyFolders[i];
+                this.ncp('./' + this.config.folders.theme + '/' + folder, './' + this.config.folders.site + '/' + folder, function (err) { if (err) { return console.error(err); } });
+            }
+        }
+
+        private saveAtom() { 
+            this.getAtom().saveToPath('./' + this.config.folders.site, 'atom.xml', this.config.fileEncode);
+        }
+
+        private buildPages() { 
+            if (this.pages.length > 0) {
+                for (var i = 0; i < this.pages.length; i++) {
+                    this.pages[i].build();
+                }
+            }
+        }
+
+        private saveMdPages() { 
+            for (var i = 0; i < this.pages.length; i++) {
+                this.pages[i].getSource().save(this.config.fileEncode);
+            }
+        }
+
+        private saveJadePages() { 
+            var itens = this.getJadePages();
+            for (var i = 0; i < itens.length; i++) {
+                BlogHubDiagnostics.info('[Create] file: ' + itens[i])
+                this.getPage('./' + this.config.folders.theme + '/' + itens[i]).saveToPath(
+                    this.config.folders.site,
+                    '/' + itens[i].substr(0, itens[i].lastIndexOf('.')) + '.html',
+                    this.config.fileEncode);
+            }
+        }
+
+        private savePages() { 
+            this.saveJadePages();
+            this.saveAtom();
+            this.saveMdPages();
+        }
+
         public build() {
             this.loadPlugins();
             this.loadPages();
 
             if (this.pages.length > 0) {
-                for (var i = 0; i < this.pages.length; i++) {
-                    this.pages[i].build();
-                }
+                this.buildPages();
 
                 this.fs3.removeRecursive('./' + this.config.folders.site, (err, status) => {
-
-                    var itens = this.getJadePages();
-                    for (var i = 0; i < itens.length; i++) {
-                        BlogHubDiagnostics.info('[Create] file: ' + itens[i])
-                        this.getPage('./' + this.config.folders.theme + '/' + itens[i]).saveToPath(
-                            this.config.folders.site,
-                            '/' + itens[i].substr(0, itens[i].lastIndexOf('.')) + '.html',
-                            this.config.fileEncode);
-                    }
-
-                    this.getAtom().saveToPath('./' + this.config.folders.site, 'atom.xml', this.config.fileEncode);
-
-                    // pages
-                    for (var i = 0; i < this.pages.length; i++) {
-                        this.pages[i].getSource().save(this.config.fileEncode);
-                    }
-
-                    // copy folders
-                    for (var i = 0; i < this.config.copyFolders.length; i++) { 
-                        var folder = this.config.copyFolders[i];
-                        this.ncp('./' + this.config.folders.theme + '/' + folder, './' + this.config.folders.site + '/' + folder, function (err) { if (err) { return console.error(err); } });
-                    }
+                    this.savePages();
+                    this.copyThemeFolders();
                 });
             }
         }
