@@ -1,0 +1,28 @@
+﻿extends tmpl/master
+
+block title
+	| #{page.header.title}
+
+block header
+	| #{config.tagLine}
+
+block content
+	div.span12
+
+		h2.post_title
+			a(href="#") #{page.date.asDateObject().format('dd/mm/yyyy')} - #{page.header.title}
+		hr
+		!{page.content.html}
+		hr
+		div !{ main.renderPlugin('GroupPaginator', main, page) }
+		h3 Posts recentes
+		ul
+			- if (main.pages.length > 0)
+				- var max = (main.pages.length < 3 ? main.pages.length : 3);
+				- for (var i = 0; i < max; i++)
+					li #{main.pages[i].date.asDateObject().format('dd/mm/yyyy')} » 
+						a(href='#{(config.folders.basePath ? config.folders.basePath : '' ) 
+							+ main.pages[i].url
+							+ (config.folders.basePath ? 'index.html' : '' )}', title=main.pages[i].title) #{main.pages[i].header.title}
+
+		// comments

@@ -1,0 +1,53 @@
+﻿extends tmpl/master
+
+block title
+	- var groups = [];
+	- if (main.pages.length > 0)
+		- for (var i = 0; i < main.pages.length; i++)
+			- var page = main.pages[i];
+
+			- if (!groups[page.header.group])
+				- groups[page.header.group] = [];
+
+			- groups[page.header.group].push(page);
+
+		- for (var key in groups)
+			- var group = groups[key];
+
+			- for (var k = 0; k < group.length; k++)
+				- if (k > 0)
+					- group[k].previous = group[k - 1];
+				- if (k < group.length)
+					- group[k].next = group[k + 1];
+			
+	- var page = groups[config['home']][0];
+	| #{page.header.title}
+
+block header
+	| #{page.header.title}
+
+block content
+	article.post.type-post.status-publish.format-standard.hentry.category-uncategorized.tag-boat.tag-lake
+		header.entry-header
+			h1.entry-title
+				a(href="#", title="#{page.header.title}", rel="bookmark") #{page.header.title}
+
+		div.entry-content
+			!{page.content.html}
+		
+		footer.entry-meta 
+			| This entry was posted in 
+			a(href="/categories.html##{page.header.category}-ref", title="View all posts in #{page.header.category}", rel="category") #{page.header.category}
+			| and tagged &nbsp;
+			- for(var i = 0; i < page.header.tags.length; i++)
+				- tag = page.header.tags[i];
+				a(href="/tags.html##{tag}-ref", rel="tag") #{tag}
+				- if(i < page.header.tags.length - 1)
+					| ,
+			| &nbsp; on 
+			a(href="#", rel="bookmark")
+				time.entry-date(datetime="#{page.date.asDateObject().format('isoDateTime')}") #{page.date.asDateObject().format('dddd, mmmm dS, yyyy')}
+			span.by-author by 
+				span.author vcard
+					a.url.fn.n(href="#", title="View all posts by #{page.header.author}", rel="author") #{page.header.author}
+			// comments

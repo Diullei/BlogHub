@@ -21,6 +21,6 @@
 		"twitter": "diullei"
 	},
 	"url": "http://current.url",
-	"home": "default",
-	"exclude": ["css", "img", "js"]
+	"default_group": "default",
+	"copy_folders": ["css", "img", "js"]
 }

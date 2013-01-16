@@ -1,0 +1,29 @@
+﻿extends tmpl/master
+
+block title
+	| Categories
+
+block header
+	| Categories
+
+block content
+	div.span12
+		- var categories = {};
+		- for (var i = 0; i < main.pages.length; i++)
+			- var page = main.pages[i];
+			- if (!categories[page.header.category])
+				- categories[page.header.category] = [];
+			- categories[page.header.category].push(page);
+
+		ul.tag_box.inline
+			- for (var category in categories)
+				li
+					a(href="/categories.html##{category}-ref") #{category} &nbsp;
+						span #{categories[category].length}
+		
+		- for (var category in categories)
+			h2(id="#{category}-ref") #{category}
+			ul
+				-for (var i = 0; i < categories[category].length; i++)
+					li
+						a(href="#") #{categories[category][i].header.title}

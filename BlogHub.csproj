@@ -47,6 +47,9 @@
     <Content Include="lib\base_blog\_theme\js\bootstrap.js" />
     <Content Include="lib\base_blog\_theme\js\bootstrap.min.js" />
     <Content Include="lib\blogHub.ts" />
+    <Content Include="lib\engine\blogHubDiagnostics.ts" />
+    <Content Include="lib\engine\config.ts" />
+    <Content Include="lib\engine\io.ts" />
     <Content Include="lib\engine\print.ts" />
     <Content Include="lib\engine\main.ts" />
     <Content Include="lib\engine\optionsParser.ts" />
@@ -55,6 +58,9 @@
     <Content Include="lib\engine\site\siteFile.ts" />
     <Content Include="lib\engine\site\siteHub.ts" />
     <Content Include="lib\engine\source.ts" />
+    <Content Include="lib\engine\staticHttpServer.ts" />
+    <Content Include="themes\single\css\ie.css" />
+    <Content Include="themes\single\css\style.css" />
     <None Include="lib\base_blog\atom.jade" />
     <None Include="lib\base_blog\_theme\categories.jade" />
     <None Include="lib\base_blog\_theme\index.jade" />
@@ -66,9 +72,16 @@
     <None Include="lib\base_blog\_theme\inc\scripts.jade" />
     <Content Include="lib\base_blog\_plugins\GroupPaginator\main.ts" />
     <None Include="lib\base_blog\_plugins\GroupPaginator\template.jade" />
-    <Content Include="lib\httpServer.js" />
     <Content Include="test\files\blog\templates\index.html" />
     <Content Include="test\site_test.ts" />
+    <Content Include="themes\single\css\f.css" />
+    <None Include="package.json" />
+    <None Include="themes\single\categories.jade" />
+    <None Include="themes\single\index.jade" />
+    <None Include="themes\single\pages.jade" />
+    <None Include="themes\single\tags.jade" />
+    <None Include="themes\single\tmpl\master.jade" />
+    <None Include="themes\single\tmpl\post.jade" />
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\base_blog\_config.json" />
@@ -85,15 +98,17 @@
     <Folder Include="lib\base_blog\_src\" />
     <Folder Include="lib\engine\site\doc\" />
     <Folder Include="Properties\" />
+    <Folder Include="themes\single\img\" />
+    <Folder Include="themes\single\js\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>tsc $(ProjectDir)lib/blogHub.ts --out $(ProjectDir)bin/main.js --target es5
+tsc $(ProjectDir)lib/base_blog/_plugins/GroupPaginator/main.ts --target es5</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>tsc $(ProjectDir)lib/blogHub.ts --out $(ProjectDir)bin/main.js
-tsc $(ProjectDir)lib/base/_plugins/GroupPaginator/main.ts</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

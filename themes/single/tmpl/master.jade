@@ -1,0 +1,46 @@
+!!!
+html(lang="en-US")
+	head
+		meta(http-equiv="Content-Type", content="text/html; charset=UTF-8")
+		meta(charset="UTF-8")
+		meta(name="viewport", content="width=device-width")
+		title 
+			block title
+		link(rel="stylesheet", href="/css/f.css", type="text/css", media="all")
+		link(rel="stylesheet", href="/css/style.css", type="text/css", media="all")
+		style(type="text/css") 
+			.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}
+
+	body.home.blog.custom-font-enabled.single-author
+		div#page.hfeed.site
+			header#masthead.site-header(role="banner")
+				hgroup
+					h1.site-title
+						a(href="/", title="NAME", rel="home") #{config.title}
+					h2.site-description #{config.tagLine}
+
+				nav#site-navigation.main-navigation(role="navigation")
+					div.nav-menu
+						ul
+							li.current_page_item
+								a(href="/", title="Home") Home
+							li.page_item.page-item-2
+								a(href="/categories.html") Categories
+							li.page_item.page-item-3
+								a(href="/pages.html") Pages
+							li.page_item.page-item-4
+								a(href="/tags.html") Tags
+							li.page_item.page-item-5
+								a(href="/archive.html") Archive
+
+			div#main.wrapper
+				div#primary.site-content
+					div#content(role="main")
+
+					block content
+
+				// secondary
+				
+			footer#colophon(role="contentinfo")
+				div.site-info
+					a(href="https://github.com/Diullei/BlogHub", target="_blank", title="BlogHub - NodeJS site engine") BlogHub

@@ -1,15 +1,57 @@
+var ConfigFileNotFoundException = (function () {
+    function ConfigFileNotFoundException() {
+        this.message = "Config file not found.";
+    }
+    return ConfigFileNotFoundException;
+})();
+var BlogHubDiagnostics = (function () {
+    function BlogHubDiagnostics() { }
+    BlogHubDiagnostics.log4js = require('log4js');
+    BlogHubDiagnostics.logger = undefined;
+    BlogHubDiagnostics.init = function init() {
+        BlogHubDiagnostics.log4js.configure({
+            appenders: [
+                {
+                    type: 'console'
+                }
+            ]
+        });
+        BlogHubDiagnostics.logger = BlogHubDiagnostics.log4js.getLogger('bloghub');
+        BlogHubDiagnostics.logger.setLevel('INFO');
+    }
+    BlogHubDiagnostics.trace = function trace(msg) {
+        BlogHubDiagnostics.logger.trace(msg);
+    }
+    BlogHubDiagnostics.debug = function debug(msg) {
+        BlogHubDiagnostics.logger.debug(msg);
+    }
+    BlogHubDiagnostics.info = function info(msg) {
+        BlogHubDiagnostics.logger.info(msg);
+    }
+    BlogHubDiagnostics.warn = function warn(msg) {
+        BlogHubDiagnostics.logger.warn(msg);
+    }
+    BlogHubDiagnostics.error = function error(msg) {
+        BlogHubDiagnostics.logger.error(msg);
+    }
+    BlogHubDiagnostics.fatal = function fatal(msg) {
+        BlogHubDiagnostics.logger.fatal(msg);
+    }
+    return BlogHubDiagnostics;
+})();
 var Site;
 (function (Site) {
     var SiteFile = (function () {
-        function SiteFile(file, config) {
+        function SiteFile(file) {
             this.fs = require('fs');
             this.BREAK_LINE = '\n';
             this.header = {
             };
+            this.config = new Config();
             var lines = null;
             var fileContent = null;
             try  {
-                fileContent = this.fs.readFileSync('./' + config['folders']['content'] + '/' + file, config['file_encode']);
+                fileContent = this.fs.readFileSync('./' + this.config.folders.content + '/' + file, this.config.fileEncode);
             } catch (err) {
                 console.error("There was an error opening the file:");
                 console.log(err);
@@ -64,14 +106,14 @@ var Source = (function () {
 var Site;
 (function (Site) {
     var SiteBase = (function () {
-        function SiteBase(config, siteHub, siteFile, file) {
-            this.config = config;
+        function SiteBase(siteHub, siteFile, file) {
             this.siteHub = siteHub;
             this.siteFile = siteFile;
             this.file = file;
             this.fs = require('fs');
             this.jade = require('jade');
             this.showdown = require('./libs/showdown.js');
+            this.config = new Config();
             if(!this.file) {
                 throw new Error('site file name cant be null');
             }
@@ -84,18 +126,18 @@ var Site;
             return '';
         };
         SiteBase.prototype.build = function () {
-            this.url = this.relatovePathName().substr(this.config['folders']['site'].length + 1);
+            this.url = this.relatovePathName().substr(this.config.folders.site.length + 1);
         };
         SiteBase.prototype.getSource = function () {
             var fileContent = null;
             try  {
-                fileContent = this.fs.readFileSync('./' + this.config['folders']['theme'] + '/' + (this.siteFile.header['template']), this.config['file_encode']);
+                fileContent = this.fs.readFileSync('./' + this.config.folders.theme + '/' + (this.siteFile.header['template']), this.config.fileEncode);
             } catch (err) {
                 console.error("There was an error opening the file:");
                 console.log(err);
             }
             var render = this.jade.compile(fileContent, {
-                filename: this.config['folders']['theme'] + '/tmpl'
+                filename: this.config.folders.theme + '/tmpl'
             });
             return new Source(render({
                 main: this.siteHub,
@@ -118,6 +160,32 @@ var Print = (function () {
     }
     return Print;
 })();
+var IO = (function () {
+    function IO() { }
+    IO.fs = require('fs');
+    IO.ncp = require('ncp').ncp;
+    IO.readFileSync = function readFileSync(file) {
+        var fileContent = null;
+        try  {
+            return fileContent = this.fs.readFileSync(file);
+        } catch (err) {
+            throw new ConfigFileNotFoundException();
+        }
+    }
+    IO.readJsonFile = function readJsonFile(file) {
+        var fileContent = IO.readFileSync(file);
+        return JSON.parse(fileContent);
+    }
+    IO.readDirSync = function readDirSync(path) {
+        return this.fs.readdirSync(path);
+    }
+    IO.copyFolder = function copyFolder(folder, destination, callback) {
+        this.ncp(folder, destination, function (err) {
+            callback(err);
+        });
+    }
+    return IO;
+})();
 var __extends = this.__extends || function (d, b) {
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -128,14 +196,14 @@ var Site;
     (function (Blog) {
         var Builder = (function () {
             function Builder() {
-                this.ncp = require('ncp').ncp;
+                this.CURRENT_FOLDER = './';
             }
             Builder.prototype.exec = function () {
-                this.ncp(__dirname + '/../lib/base_blog/', "./", function (err) {
+                IO.copyFolder(__dirname + '/../lib/base_blog/', this.CURRENT_FOLDER, function (err) {
                     if(err) {
-                        return Print.out(err);
+                        throw err;
                     }
-                    Print.out('Info! blog site created');
+                    BlogHubDiagnostics.info('blog site created');
                 });
             };
             return Builder;
@@ -168,8 +236,8 @@ var Site;
         Blog.Content = Content;        
         var BlogPage = (function (_super) {
             __extends(BlogPage, _super);
-            function BlogPage(siteHub, file, config, siteFile) {
-                        _super.call(this, config, siteHub, siteFile, file);
+            function BlogPage(siteHub, file, siteFile) {
+                        _super.call(this, siteHub, siteFile, file);
                 this.MATCH = /^(.+\/)*(\d{4}-\d{2}-\d{2})-(.*)(\.[^.]+)$/g;
                 this.header = new Header();
                 this.date = new PostDate();
@@ -215,8 +283,9 @@ var Site;
                 return file.match(this.MATCH);
             };
             BlogPage.prototype.relatovePathName = function () {
-                var result = '/' + this.config['folders']['site'] + '/';
-                var parts = this.config['folders']['blog']['relativePath'].split('/');
+                var config = new Config();
+                var result = '/' + config.folders.site + '/';
+                var parts = config.folders.blog.relativePath.split('/');
                 for(var i = 0; i < parts.length; i++) {
                     if(parts[i] && parts[i].substr(1).trim() != '') {
                         var p = eval('this.' + parts[i].substr(1));
@@ -258,10 +327,231 @@ var Site;
     })(Site.Blog || (Site.Blog = {}));
     var Blog = Site.Blog;
 })(Site || (Site = {}));
+var ConfigPropertyNotFoundException = (function () {
+    function ConfigPropertyNotFoundException(key) {
+        this.message = "Config property: '" + key + "' not found";
+    }
+    return ConfigPropertyNotFoundException;
+})();
+var BlogCobfig = (function () {
+    function BlogCobfig(cfg) {
+        this.cfg = cfg;
+    }
+    Object.defineProperty(BlogCobfig.prototype, "relativePath", {
+        get: function () {
+            return this.get('relativePath');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    BlogCobfig.prototype.get = function (key) {
+        if(this.cfg.__blog[key]) {
+            return this.cfg.__blog[key];
+        } else {
+            throw new ConfigPropertyNotFoundException('blog.' + key);
+        }
+    };
+    return BlogCobfig;
+})();
+var AuthorConfig = (function () {
+    function AuthorConfig(cfg) {
+        this.cfg = cfg;
+    }
+    Object.defineProperty(AuthorConfig.prototype, "name", {
+        get: function () {
+            return this.get('name');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AuthorConfig.prototype, "email", {
+        get: function () {
+            return this.get('email');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AuthorConfig.prototype, "github", {
+        get: function () {
+            return this.get('github');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AuthorConfig.prototype, "twitter", {
+        get: function () {
+            return this.get('twitter');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    AuthorConfig.prototype.get = function (key) {
+        if(key in this.cfg.__author) {
+            return this.cfg.__author[key];
+        } else {
+            throw new ConfigPropertyNotFoundException('author.' + key);
+        }
+    };
+    return AuthorConfig;
+})();
+var FoldersConfig = (function () {
+    function FoldersConfig(cfg) {
+        this.cfg = cfg;
+    }
+    Object.defineProperty(FoldersConfig.prototype, "site", {
+        get: function () {
+            return this.get('site');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(FoldersConfig.prototype, "plugins", {
+        get: function () {
+            return this.get('plugins');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(FoldersConfig.prototype, "content", {
+        get: function () {
+            return this.get('content');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(FoldersConfig.prototype, "theme", {
+        get: function () {
+            return this.get('theme');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(FoldersConfig.prototype, "basePath", {
+        get: function () {
+            return this.get('basePath');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(FoldersConfig.prototype, "current", {
+        get: function () {
+            return process.cwd();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(FoldersConfig.prototype, "__blog", {
+        get: function () {
+            return this.get('blog');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(FoldersConfig.prototype, "blog", {
+        get: function () {
+            return new BlogCobfig(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    FoldersConfig.prototype.get = function (key) {
+        if(key in this.cfg.__folders) {
+            return this.cfg.__folders[key];
+        } else {
+            throw new ConfigPropertyNotFoundException('folders.' + key);
+        }
+    };
+    return FoldersConfig;
+})();
+var Config = (function () {
+    function Config() {
+        this.init();
+    }
+    Config.json = undefined;
+    Object.defineProperty(Config.prototype, "version", {
+        get: function () {
+            return this.get('version');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Config.prototype, "fileEncode", {
+        get: function () {
+            return this.get('file_encode');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Config.prototype, "copyFolders", {
+        get: function () {
+            return this.get('copy_folders');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Config.prototype, "__folders", {
+        get: function () {
+            return this.get('folders');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Config.prototype, "folders", {
+        get: function () {
+            return new FoldersConfig(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Config.prototype, "__author", {
+        get: function () {
+            return this.get('author');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Config.prototype, "author", {
+        get: function () {
+            return new AuthorConfig(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Config.prototype, "tagLine", {
+        get: function () {
+            return this.get('tagLine');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Config.prototype, "defaultGroup", {
+        get: function () {
+            return this.get('default_group');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Config.prototype.init = function () {
+        if(!Config.json) {
+            BlogHubDiagnostics.debug('loading config file');
+            Config.json = IO.readJsonFile('./_config.json');
+            BlogHubDiagnostics.debug('config file loaded');
+        }
+    };
+    Config.prototype.get = function (key) {
+        if(key in Config.json) {
+            return Config.json[key];
+        } else {
+            throw new ConfigPropertyNotFoundException(key);
+        }
+    };
+    return Config;
+})();
 var Site;
 (function (Site) {
     var SiteHub = (function () {
         function SiteHub() {
+            this.MAIN_PLUGIN_FILE = '/main.js';
             this.fs = require('fs');
             this.jade = require('jade');
             this.fs3 = require('./libs/fs.removeRecursive');
@@ -270,40 +560,35 @@ var Site;
             this.pages = [];
             this.plugins = {
             };
+            this.config = new Config();
         }
-        SiteHub.prototype.renderPlugin = function (plugin, main, page) {
-            return this.plugins[plugin.toUpperCase()].render(main, page);
+        SiteHub.prototype.renderPlugin = function (plugin, page) {
+            BlogHubDiagnostics.debug('loading "' + plugin + '" plugin');
+            if(this.plugins[plugin.toUpperCase()]) {
+                return this.plugins[plugin.toUpperCase()].render(this, page, this.config);
+            } else {
+                BlogHubDiagnostics.error('"' + plugin + '" plugin not found');
+                return '<div style="color:red;border: 2px solid red;background-color: yellow;padding: 15px;"><strong>' + plugin + '</strong> PLUGIN NOT FOUND</div>';
+            }
         };
         SiteHub.prototype.loadPlugins = function () {
-            var itens = this.fs.readdirSync(this.config['folders']['plugins']);
+            var itens = this.fs.readdirSync(this.config.folders.plugins);
             for(var i = 0; i < itens.length; i++) {
                 var item = itens[i];
-                var plugin = require(process.cwd() + '/' + this.config['folders']['plugins'] + '/' + item + '/main.js');
+                var plugin = require(this.config.folders.current + '/' + this.config.folders.plugins + '/' + item + this.MAIN_PLUGIN_FILE);
                 this.plugins[item.toUpperCase()] = plugin;
             }
         };
-        SiteHub.prototype.loadConfig = function () {
-            var fileContent = null;
-            try  {
-                fileContent = this.fs.readFileSync('./_config.json');
-            } catch (err) {
-                console.error("There was an error opening the file:");
-                console.log(err);
-            }
-            this.config = JSON.parse(fileContent);
-            this.loadPlugins();
-        };
         SiteHub.prototype.loadPages = function () {
-            var files = this.fs.readdirSync(this.config['folders']['content']);
+            var files = this.fs.readdirSync(this.config.folders.content);
             if(files.length > 0) {
                 files = this.enumerable.From(files).Reverse().ToArray();
                 for(var i = 0; i < files.length; i++) {
-                    var siteFile = new Site.SiteFile(files[i], this.config);
+                    var siteFile = new Site.SiteFile(files[i]);
                     if(siteFile.header['engine']) {
                         var engine = siteFile.header['engine'];
                         if(engine == 'blog') {
-                            console.log(engine);
-                            var page = new Site.Blog.BlogPage(this, files[i], this.config, siteFile);
+                            var page = new Site.Blog.BlogPage(this, files[i], siteFile);
                             this.pages.push(page);
                         } else {
                             if(engine == 'doc') {
@@ -319,38 +604,38 @@ var Site;
         SiteHub.prototype.getPage = function (page) {
             var fileContent = null;
             try  {
-                fileContent = this.fs.readFileSync(page, this.config['file_encode']);
+                fileContent = this.fs.readFileSync(page, this.config.fileEncode);
             } catch (err) {
                 console.error("There was an error opening the file:");
                 console.log(err);
             }
             var render = this.jade.compile(fileContent, {
-                filename: this.config['folders']['theme'] + '/tmpl'
+                filename: this.config.folders.theme + '/tmpl'
             });
             return new Source(render({
                 main: this,
                 config: this.config
-            }), this.config['folders']['site']);
+            }), this.config.folders.site);
         };
         SiteHub.prototype.getAtom = function () {
             var fileContent = null;
             try  {
-                fileContent = this.fs.readFileSync('./atom.jade', this.config['file_encode']);
+                fileContent = this.fs.readFileSync('./atom.jade', this.config.fileEncode);
             } catch (err) {
                 console.error("There was an error opening the file:");
                 console.log(err);
             }
             var render = this.jade.compile(fileContent, {
-                filename: this.config['folders']['theme'] + '/tmpl'
+                filename: this.config.folders.theme + '/tmpl'
             });
             return new Source(render({
                 main: this,
                 config: this.config
-            }), this.config['folders']['site'] + '/atom.xml');
+            }), this.config.folders.site + '/atom.xml');
         };
         SiteHub.prototype.getJadePages = function () {
             var pages = [];
-            var itens = this.fs.readdirSync('./' + this.config['folders']['theme']);
+            var itens = this.fs.readdirSync('./' + this.config.folders.theme);
             for(var i = 0; i < itens.length; i++) {
                 if(itens[i].substr(itens[i].lastIndexOf('.')).toUpperCase() == '.JADE') {
                     pages.push(itens[i]);
@@ -360,25 +645,25 @@ var Site;
         };
         SiteHub.prototype.build = function () {
             var _this = this;
-            this.loadConfig();
+            this.loadPlugins();
             this.loadPages();
             if(this.pages.length > 0) {
                 for(var i = 0; i < this.pages.length; i++) {
                     this.pages[i].build();
                 }
-                this.fs3.removeRecursive('./' + this.config['folders']['site'], function (err, status) {
+                this.fs3.removeRecursive('./' + this.config.folders.site, function (err, status) {
                     var itens = _this.getJadePages();
                     for(var i = 0; i < itens.length; i++) {
-                        console.log(itens[i]);
-                        _this.getPage('./' + _this.config['folders']['theme'] + '/' + itens[i]).saveToPath(_this.config['folders']['site'], '/' + itens[i].substr(0, itens[i].lastIndexOf('.')) + '.html', _this.config['file_encode']);
+                        BlogHubDiagnostics.info('[Create] file: ' + itens[i]);
+                        _this.getPage('./' + _this.config.folders.theme + '/' + itens[i]).saveToPath(_this.config.folders.site, '/' + itens[i].substr(0, itens[i].lastIndexOf('.')) + '.html', _this.config.fileEncode);
                     }
-                    _this.getAtom().saveToPath('./' + _this.config['folders']['site'], 'atom.xml', _this.config['file_encode']);
+                    _this.getAtom().saveToPath('./' + _this.config.folders.site, 'atom.xml', _this.config.fileEncode);
                     for(var i = 0; i < _this.pages.length; i++) {
-                        _this.pages[i].getSource().save(_this.config['file_encode']);
+                        _this.pages[i].getSource().save(_this.config.fileEncode);
                     }
-                    for(var i = 0; i < _this.config['exclude'].length; i++) {
-                        var folder = _this.config['exclude'][i];
-                        _this.ncp('./' + _this.config['folders']['theme'] + '/' + folder, './' + _this.config['folders']['site'] + '/' + folder, function (err) {
+                    for(var i = 0; i < _this.config.copyFolders.length; i++) {
+                        var folder = _this.config.copyFolders[i];
+                        _this.ncp('./' + _this.config.folders.theme + '/' + folder, './' + _this.config.folders.site + '/' + folder, function (err) {
                             if(err) {
                                 return console.error(err);
                             }
@@ -392,8 +677,16 @@ var Site;
     Site.SiteHub = SiteHub;    
 })(Site || (Site = {}));
 var OptionsParserException = (function () {
-    function OptionsParserException(opt) {
-        this.message = "Error! Unknown option '" + opt + "'\nError! Use the '--help' flag to see options\n";
+    function OptionsParserException() {
+        this.message = '';
+        var opts = arguments[0];
+        if(Array.isArray(opts)) {
+            for(var i = 0; i < opts.length; i++) {
+                this.message += "\nUnknown option '" + opts[i] + "'\nUse the '--help' flag to see options\n";
+            }
+        } else {
+            this.message = "\nUnknown option '" + opts + "'\nUse the '--help' flag to see options\n";
+        }
     }
     return OptionsParserException;
 })();
@@ -509,20 +802,44 @@ var OptionsParser = (function () {
     };
     return OptionsParser;
 })();
+var StaticHttpServer = (function () {
+    function StaticHttpServer() {
+        this.fs = require('fs');
+        this.express = require('express');
+    }
+    StaticHttpServer.prototype.init = function () {
+        var _this = this;
+        BlogHubDiagnostics.debug('Initing Static HttpServer');
+        this.config = new Config();
+        this.server = this.express();
+        this.server.configure(function () {
+            var path = _this.config.folders.current + '/' + _this.config.folders.site;
+            _this.server.use(path, _this.express.static(path));
+            _this.server.use(_this.express.static(path));
+        });
+    };
+    StaticHttpServer.prototype.start = function () {
+        BlogHubDiagnostics.debug('Starting HttpServer...');
+        this.server.listen(3000);
+        BlogHubDiagnostics.info('Ready on http://localhost:3000/');
+    };
+    return StaticHttpServer;
+})();
 var FolderNotEmptyException = (function () {
     function FolderNotEmptyException() {
-        this.message = "Error! this folder is not empty.\n";
+        this.message = "This folder is not empty";
     }
     return FolderNotEmptyException;
 })();
 var CreateSiteTypeException = (function () {
     function CreateSiteTypeException() {
-        this.message = "Error! Invalid create site argument.\n";
+        this.message = "Invalid create site argument";
     }
     return CreateSiteTypeException;
 })();
 var Main = (function () {
     function Main() {
+        this.CURRENT_FOLDER = './';
         this.fs = require('fs');
     }
     Main.prototype.batchCompile = function () {
@@ -535,23 +852,34 @@ var Main = (function () {
                 _this.newSite(str);
             }
         }, 'n');
-        opts.option('build', {
-            usage: 'build the site',
+        opts.flag('build', {
+            usage: 'Build the site',
             set: function () {
                 _this.buildSite();
             }
         }, 'b');
+        opts.flag('server', {
+            usage: 'Run local server',
+            set: function () {
+                _this.runServer();
+            }
+        }, 's');
         opts.flag('help', {
             usage: 'Print this message',
             set: function () {
                 opts.printUsage();
             }
         }, 'h');
+        BlogHubDiagnostics.debug('process.argv.length: ' + process.argv.slice(2).length);
         opts.parse(process.argv.slice(2));
         for(var i = 0; i < opts.unnamed.length; i++) {
-            throw new OptionsParserException(opts.unnamed[i]);
+            BlogHubDiagnostics.error('unnamed opts: ' + opts.unnamed[i]);
+        }
+        if(opts.unnamed.length > 0) {
+            throw new OptionsParserException(opts.unnamed);
         }
         if(opts.length == 0) {
+            BlogHubDiagnostics.debug('printing help...');
             opts.printUsage();
         }
     };
@@ -559,8 +887,13 @@ var Main = (function () {
         new Site.SiteHub().build();
     };
     Main.prototype.isFolderEmpty = function () {
-        var itens = this.fs.readdirSync("./");
+        var itens = IO.readDirSync(this.CURRENT_FOLDER);
         return itens.length == 0;
+    };
+    Main.prototype.runServer = function () {
+        var server = new StaticHttpServer();
+        server.init();
+        server.start();
     };
     Main.prototype.newSite = function (type) {
         if(!type) {
@@ -569,10 +902,10 @@ var Main = (function () {
         if(!this.isFolderEmpty()) {
             throw new FolderNotEmptyException();
         }
+        BlogHubDiagnostics.debug("new site: " + type);
         switch(type) {
             case "blog": {
                 new Site.Blog.Builder().exec();
-                this.fs.createReadStream(__dirname + '/../lib/httpServer.js').pipe(this.fs.createWriteStream('./httpServer.js'));
                 break;
 
             }
@@ -585,9 +918,11 @@ var Main = (function () {
     return Main;
 })();
 require('./libs/dateFormat');
+BlogHubDiagnostics.init();
+BlogHubDiagnostics.info('Starting...');
 try  {
     var main = new Main();
     main.batchCompile();
 } catch (e) {
-    Print.out(e.message);
+    BlogHubDiagnostics.fatal(e.message);
 }
