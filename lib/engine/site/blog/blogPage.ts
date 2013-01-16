@@ -5,21 +5,23 @@
 ///<reference path='../../../../definition/node-0.8.d.ts'/>
 
 // **** references
+///<reference path='../../blogHubDiagnostics.ts'/>
 ///<reference path='../siteBase.ts'/>
 ///<reference path='../siteHub.ts'/>
 ///<reference path='../../print.ts'/>
+///<reference path='../../io.ts'/>
 
 module Site.Blog {
 
     export class Builder { 
-        private ncp = require('ncp').ncp;
+        private CURRENT_FOLDER = './';
 
         public exec() { 
-            this.ncp(__dirname + '/../lib/base_blog/', "./", function (err) {
+            IO.copyFolder(__dirname + '/../lib/base_blog/', this.CURRENT_FOLDER, (err) => {
                 if (err) {
-                    return Print.out(err);
+                    throw err;
                 }
-                Print.out('Info! blog site created');
+                BlogHubDiagnostics.info('blog site created');
             });
         }
     }
@@ -53,8 +55,8 @@ module Site.Blog {
         public date: PostDate = new PostDate();
         public content: Content = new Content();
 
-        constructor(siteHub: SiteHub, file: string, config: Object, siteFile: SiteFile) {
-            super(config, siteHub, siteFile, file);
+        constructor(siteHub: SiteHub, file: string, siteFile: SiteFile) {
+            super(siteHub, siteFile, file);
 
             if (!this.validate(this.file)) {
                 throw new Error('invalid site file name');
@@ -103,8 +105,9 @@ module Site.Blog {
         }
 
 	    public relatovePathName() {
-		    var result = '/' + this.config['folders']['site'] + '/';
-		    var parts = this.config['folders']['blog']['relativePath'].split('/');
+            var config = new Config();
+		    var result = '/' + config.folders.site + '/';
+		    var parts = config.folders.blog.relativePath.split('/');
 		    for(var i = 0; i<parts.length; i++) {
 			    if(parts[i] && parts[i].substr(1).trim() != '') {
 				    var p = eval('this.' + parts[i].substr(1));

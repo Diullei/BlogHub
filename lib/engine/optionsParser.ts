@@ -16,12 +16,22 @@ interface IOptions {
     experimental?: bool;
 }
 
-class OptionsParserException implements Error { 
+class OptionsParserException implements Error {
     public name: string;
     public message: string;
 
-    constructor(opt: string) { 
-        this.message = "Error! Unknown option '" + opt + "'\nError! Use the '--help' flag to see options\n";
+    constructor(opts: string);
+    constructor(opts: string[]);
+    constructor() { 
+        this.message = '';
+        var opts = arguments[0];
+        if (Array.isArray(opts)) {
+            for (var i = 0; i < opts.length; i++) {
+                this.message += "\nUnknown option '" + opts[i] + "'\nUse the '--help' flag to see options\n";
+            }
+        } else { 
+            this.message = "\nUnknown option '" + opts + "'\nUse the '--help' flag to see options\n";
+        }
     }
 }
 

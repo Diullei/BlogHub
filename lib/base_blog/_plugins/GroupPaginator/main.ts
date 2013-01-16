@@ -9,7 +9,7 @@ declare var exports: any;
 exports.render = function (main, page, config) {
 	var fileContent = null;
 	try {
-		fileContent = fs.readFileSync(main.config['folders']['plugins'] + '/GroupPaginator/template.jade', main.config['file_encode']);
+		fileContent = fs.readFileSync(config.folders.plugins + '/GroupPaginator/template.jade', config.fileEncode);
 	}
 	catch (err) {
 		console.error("There was an error opening the file:");

@@ -14,7 +14,7 @@ block content
 		hr
 		!{page.content.html}
 		hr
-		div !{ main.renderPlugin('GroupPaginator', main, page) }
+		div !{ main.renderPlugin('GroupPaginator', page) }
 		h3 Posts recentes
 		ul
 			- if (main.pages.length > 0)

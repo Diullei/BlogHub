@@ -9,15 +9,18 @@ module Site {
     export class SiteFile {
         private fs = require('fs');
         private BREAK_LINE = '\n';
+        private config: Config;
 
         public header: Object = {};
         public content: string;
 
-        constructor(file: string, config: Object) {
+        constructor(file: string) {
+            this.config = new Config();
+
             var lines = null;
             var fileContent = null;
             try {
-                fileContent = this.fs.readFileSync('./' + config['folders']['content'] + '/' + file, config['file_encode']);
+                fileContent = this.fs.readFileSync('./' + this.config.folders.content + '/' + file, this.config.fileEncode);
             }
             catch (err) {
                 console.error("There was an error opening the file:");

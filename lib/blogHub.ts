@@ -4,12 +4,17 @@
 // **** references
 ///<reference path='engine/main.ts'/>
 ///<reference path='engine/print.ts'/>
+///<reference path='engine/BlogHubDiagnostics.ts'/>
 
 require('./libs/dateFormat');
+
+BlogHubDiagnostics.init();
+
+BlogHubDiagnostics.info('Starting...');
 
 try { 
     var main = new Main();
     main.batchCompile();
 } catch (e) { 
-    Print.out(e.message);
+    BlogHubDiagnostics.fatal(e.message);
 }

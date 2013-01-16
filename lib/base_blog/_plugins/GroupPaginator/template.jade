@@ -3,12 +3,12 @@ div.pagination
 		- if(page.previous) {
 			li#prev
 				a(href='#{(
-                    main.config.folders.basePath 
+                    config.folders.basePath 
                         ? main.config.folders.basePath 
                         : '' ) 
                     + page.previous.url
                     + (
-                    main.config.folders.basePath 
+                    config.folders.basePath 
                         ? 'index.html' 
                         : '' )}', title=page.previous.title) &larr; Previous
 		- } else {
@@ -22,12 +22,12 @@ div.pagination
 		- if(page.next) {
 			li#next
 				a(href='#{(
-                    main.config.folders.basePath 
-                        ? main.config.folders.basePath 
+                    config.folders.basePath 
+                        ? config.folders.basePath 
                         : '' ) 
                     + page.next.url
                     + (
-                    main.config.folders.basePath 
+                    config.folders.basePath 
                         ? 'index.html' 
                         : '' )}', title=page.next.title) Next &rarr;
 		- } else {
