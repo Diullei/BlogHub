@@ -20,7 +20,7 @@ block title
 				- if (k < group.length)
 					- group[k].next = group[k + 1];
 			
-	- var page = groups[config['home']][0];
+	- var page = groups[config.defaultGroup][0];
 	| #{page.header.title}
 
 block header
@@ -50,4 +50,27 @@ block content
 			span.by-author by 
 				span.author vcard
 					a.url.fn.n(href="#", title="View all posts by #{page.header.author}", rel="author") #{page.header.author}
+			br		
+			h2 Posts recentes
+			ul
+				- if (main.pages.length > 0)
+					- var max = (main.pages.length < 3 ? main.pages.length : 3);
+					- for (var i = 0; i < max; i++)
+						li #{main.pages[i].date.asDateObject().format('dd/mm/yyyy')} » 
+							a(href='#{(config.folders.basePath ? config.folders.basePath : '' ) 
+								+ main.pages[i].url
+								+ (config.folders.basePath ? 'index.html' : '' )}', title=main.pages[i].title) #{main.pages[i].header.title}
 			// comments
+
+block secondary
+	div#secondary.widget-area
+		aside#recent-posts-3.widget.widget_recent_entries
+			h3 Posts recentes
+			ul
+				- if (main.pages.length > 0)
+					- for (var i = 0; i < main.pages.length; i++)
+						li 
+							a(href='#{(config.folders.basePath ? config.folders.basePath : '' ) 
+								+ main.pages[i].url
+								+ (config.folders.basePath ? 'index.html' : '' )}', title='#{main.pages[i].title}') #{main.pages[i].header.title}
+				
