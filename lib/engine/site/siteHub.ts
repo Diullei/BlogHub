@@ -112,11 +112,13 @@ module Site {
         private copyThemeFolders() { 
             for (var i = 0; i < this.config.copyFolders.length; i++) { 
                 var folder = this.config.copyFolders[i];
+                BlogHubDiagnostics.info('[Create] folder: ' + folder);
                 this.ncp('./' + this.config.folders.theme + '/' + folder, './' + this.config.folders.site + '/' + folder, function (err) { if (err) { return console.error(err); } });
             }
         }
 
         private saveAtom() { 
+            BlogHubDiagnostics.info('[Create] file: atom.xml')
             this.getAtom().saveToPath('./' + this.config.folders.site, 'atom.xml', this.config.fileEncode);
         }
 
@@ -130,7 +132,9 @@ module Site {
 
         private saveMdPages() { 
             for (var i = 0; i < this.pages.length; i++) {
-                this.pages[i].getSource().save(this.config.fileEncode);
+                var source = this.pages[i].getSource();
+                BlogHubDiagnostics.info('[Create] file: ' + source.path)
+                source.save(this.config.fileEncode);
             }
         }
 
@@ -158,6 +162,7 @@ module Site {
             if (this.pages.length > 0) {
                 this.buildPages();
 
+                BlogHubDiagnostics.info('Remove site folder');
                 this.fs3.removeRecursive('./' + this.config.folders.site, (err, status) => {
                     this.savePages();
                     this.copyThemeFolders();
