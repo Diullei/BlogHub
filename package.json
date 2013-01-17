@@ -15,9 +15,6 @@
 	"devDependencies": {
 		"qunit" : "latest"
 	},
-	"scripts": {
-	  "preinstall": "npm i -g typescript"
-	},
 	"bugs" : { "url" : "http://github.com/Diullei/BlogHub/issues" }, 
 	"licenses" : [ { 
 		"type" : "MIT", 

@@ -152,6 +152,10 @@ class Config {
         return this.get('tagLine');
     }
 
+    public get title() { 
+        return this.get('title');
+    }
+
     public get defaultGroup() { 
         return this.get('default_group');
     }

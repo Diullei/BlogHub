@@ -7,6 +7,7 @@
 class IO {
     private static fs = require('fs');
     private static ncp = require('ncp').ncp;
+    private static fs2 = require('./libs/node-fs');
 
     public static readFileSync(file: string): string {
         var fileContent = null;
@@ -24,11 +25,11 @@ class IO {
     }
 
     public static readDirSync(path: string): string[] {
-        return this.fs.readdirSync(path);
+        return IO.fs.readdirSync(path);
     }
 
     public static copyFolder(folder: string, destination: string, callback: (err: any) => any) { 
-        this.ncp(folder, destination, function (err) {
+        IO.ncp(folder, destination, function (err) {
             callback(err);
         });
     }

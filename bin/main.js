@@ -164,6 +164,7 @@ var IO = (function () {
     function IO() { }
     IO.fs = require('fs');
     IO.ncp = require('ncp').ncp;
+    IO.fs2 = require('./libs/node-fs');
     IO.readFileSync = function readFileSync(file) {
         var fileContent = null;
         try  {
@@ -177,10 +178,10 @@ var IO = (function () {
         return JSON.parse(fileContent);
     }
     IO.readDirSync = function readDirSync(path) {
-        return this.fs.readdirSync(path);
+        return IO.fs.readdirSync(path);
     }
     IO.copyFolder = function copyFolder(folder, destination, callback) {
-        this.ncp(folder, destination, function (err) {
+        IO.ncp(folder, destination, function (err) {
             callback(err);
         });
     }
@@ -520,6 +521,13 @@ var Config = (function () {
     Object.defineProperty(Config.prototype, "tagLine", {
         get: function () {
             return this.get('tagLine');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Config.prototype, "title", {
+        get: function () {
+            return this.get('title');
         },
         enumerable: true,
         configurable: true
