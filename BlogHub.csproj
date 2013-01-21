@@ -59,6 +59,11 @@
     <Content Include="lib\engine\site\siteHub.ts" />
     <Content Include="lib\engine\source.ts" />
     <Content Include="lib\engine\staticHttpServer.ts" />
+    <Content Include="lib\engine\system\idisposable.ts" />
+    <Content Include="lib\engine\system\io\directory.ts" />
+    <Content Include="lib\engine\system\io\fileHandle.ts" />
+    <Content Include="lib\engine\system\io\itextWriter.ts" />
+    <Content Include="lib\engine\system\io\streamWriter.ts" />
     <Content Include="themes\single\css\ie.css" />
     <Content Include="themes\single\css\style.css" />
     <None Include="lib\base_blog\atom.jade" />

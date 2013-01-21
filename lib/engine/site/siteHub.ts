@@ -7,12 +7,14 @@
 // **** references
 ///<reference path='blog/blogPage.ts'/>
 ///<reference path='../config.ts'/>
+///<reference path='../system/io/FileHandle.ts'/>
+///<reference path='../system/io/directory.ts'/>
 
 module Site {
 
     export class SiteHub {
         private MAIN_PLUGIN_FILE = '/main.js';
-        private fs = require('fs');
+        //private fs = require('fs');
         private jade = require('jade');
         private fs3 = require('./libs/fs.removeRecursive');
         private enumerable = require('./libs/linq');
@@ -38,7 +40,8 @@ module Site {
         }
 
         private loadPlugins() {
-            var itens = this.fs.readdirSync(this.config.folders.plugins);
+            var itens = new System.IO.Directory().getFolders(this.config.folders.plugins);
+            //var itens = this.fs.readdirSync(this.config.folders.plugins);
             for (var i = 0; i < itens.length; i++) {
                 var item = itens[i];
                 var plugin = require(this.config.folders.current + '/' + this.config.folders.plugins + '/' + item + this.MAIN_PLUGIN_FILE);
@@ -46,18 +49,79 @@ module Site {
             }
         }
 
+        public getGroups(): any[] { 
+	        var groups = [];
+	        if (this.pages.length > 0) {
+	            for (var i = 0; i < this.pages.length; i++) {
+	                var page = <any>this.pages[i];
+
+	                if (!groups[page.header.group])
+	                    groups[page.header.group] = [];
+
+	                groups[page.header.group].push(page);
+	            }
+	            for (var key in groups) {
+	                var group = groups[key];
+
+	                for (var k = 0; k < group.length; k++) {
+	                    if (k > 0) {
+	                        group[k].previous = group[k - 1];
+	                    }
+	                    if (k < group.length) {
+	                        group[k].next = group[k + 1];
+	                    }
+	                }
+	            }
+	        }
+            return groups;
+        }
+
+        public getLastPageFromDefaultGroup() { 
+            return this.getGroups()[this.config.defaultGroup][0];
+        }
+
+        public getTags(): any {
+		    var tags = {};
+		    for (var i = 0; i < this.pages.length; i++){
+			    var page = <any>this.pages[i];
+			    if (page.header.tags.length > 0) {
+				    for (var j = 0; j < page.header.tags.length; j++) {
+					    var tag = page.header.tags[j];
+					    if (!tags[tag]) {
+						    tags[tag] = [];
+					    }
+					    tags[tag].push(page);
+				    }
+			    }
+		    }
+
+		    return tags;
+        }
+
+        public getCategories(): any {
+		    var categories = {};
+		    for (var i = 0; i < this.pages.length; i++){
+			    var page = <any>this.pages[i];
+			    if (!categories[page.header.category])
+				    categories[page.header.category] = [];
+			    categories[page.header.category].push(page);
+		    }
+		    return categories;
+        }
+
         private loadPages() {
-            var files = this.fs.readdirSync(this.config.folders.content);
+            var files = new System.IO.Directory().getFiles(this.config.folders.content);
+            //var files = this.fs.readdirSync(this.config.folders.content);
             if (files.length > 0) {
                 files = this.enumerable.From(files).Reverse().ToArray();
-
                 for (var i = 0; i < files.length; i++) {
-                    var siteFile = new SiteFile(files[i]);
+                    var file = files[i].substr(this.config.folders.content.length + 1);
+                    var siteFile = new SiteFile(file);
                     if (siteFile.header['engine']) {
                         var engine = siteFile.header['engine'];
                         if (engine == 'blog') {
 
-                            var page = new Site.Blog.BlogPage(this, files[i], siteFile);
+                            var page = new Site.Blog.BlogPage(this, file, siteFile);
                             this.pages.push(page);
 
                         } else if (engine == 'doc') {
@@ -71,14 +135,15 @@ module Site {
         private getPage(page: string) {
             var fileContent = null;
             try {
-                fileContent = this.fs.readFileSync(page, this.config.fileEncode);
+                fileContent = new System.IO.FileHandle().readFile(page);
+                //fileContent = this.fs.readFileSync(page, this.config.fileEncode);
             }
             catch (err) {
                 console.error("There was an error opening the file:");
                 console.log(err);
             }
 
-            var render = this.jade.compile(fileContent, { filename: this.config.folders.theme + '/tmpl' });
+            var render = this.jade.compile(fileContent, { compileDebug: true, filename: this.config.folders.theme + '/tmpl' });
 
             return new Source(render({ main: this, config: this.config }), this.config.folders.site);
         }
@@ -86,7 +151,8 @@ module Site {
         private getAtom() {
             var fileContent = null;
             try {
-                fileContent = this.fs.readFileSync('./atom.jade', this.config.fileEncode);
+                fileContent = new System.IO.FileHandle().readFile('./atom.jade');
+                //fileContent = this.fs.readFileSync('./atom.jade', this.config.fileEncode);
             }
             catch (err) {
                 console.error("There was an error opening the file:");
@@ -100,10 +166,12 @@ module Site {
 
         public getJadePages(): string[] {
             var pages: string[] = [];
-            var itens = this.fs.readdirSync('./' + this.config.folders.theme);
+            var itens = new System.IO.Directory().getFiles('./' + this.config.folders.theme);
+            //var itens = this.fs.readdirSync('./' + this.config.folders.theme);
             for (var i = 0; i < itens.length; i++) {
-                if (itens[i].substr(itens[i].lastIndexOf('.')).toUpperCase() == '.JADE') {
-                    pages.push(itens[i]);
+                var item = itens[i].substr(this.config.folders.theme.length + 2);
+                if (item.substr(item.lastIndexOf('.')).toUpperCase() == '.JADE') {
+                    pages.push(item);
                 }
             }
             return pages;

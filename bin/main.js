@@ -555,12 +555,215 @@ var Config = (function () {
     };
     return Config;
 })();
+var System;
+(function (System) {
+    })(System || (System = {}));
+var System;
+(function (System) {
+    (function (IO) {
+        var StreamWriter = (function () {
+            function StreamWriter() {
+                this.autoFlush = true;
+            }
+            StreamWriter.prototype.flush = function () {
+                throw new Error("Not Implemented Exception");
+            };
+            StreamWriter.prototype.flushAsync = function (callback) {
+                throw new Error("Not Implemented Exception");
+            };
+            StreamWriter.prototype.write = function (value) {
+                if(!this._buffer) {
+                    this._buffer = '';
+                }
+                this._buffer += value;
+                if(this.autoFlush) {
+                    this.flush();
+                    this._buffer = null;
+                }
+            };
+            StreamWriter.prototype.writeLine = function (value) {
+                this.write(value + '\n');
+            };
+            StreamWriter.prototype.writeAsync = function (value, callback) {
+                var _this = this;
+                if(!this._buffer) {
+                    this._buffer = '';
+                }
+                this._buffer += value;
+                if(this.autoFlush) {
+                    this.flushAsync(function () {
+                        _this._buffer = null;
+                        callback();
+                    });
+                }
+            };
+            StreamWriter.prototype.writeLineAsync = function (value, callback) {
+                this.writeAsync(value + '\n', callback);
+            };
+            StreamWriter.prototype.dispose = function () {
+                throw new Error("Not Implemented Exception");
+            };
+            StreamWriter.prototype.close = function () {
+                throw new Error("Not Implemented Exception");
+            };
+            return StreamWriter;
+        })();
+        IO.StreamWriter = StreamWriter;        
+    })(System.IO || (System.IO = {}));
+    var IO = System.IO;
+})(System || (System = {}));
+var System;
+(function (System) {
+    (function (IO) {
+        var FileStreamWriter = (function (_super) {
+            __extends(FileStreamWriter, _super);
+            function FileStreamWriter(path) {
+                        _super.call(this);
+                this.path = path;
+                this._fs = require('fs');
+                this.autoFlush = false;
+            }
+            FileStreamWriter.prototype.flush = function () {
+                this._fs.appendFileSync(this.path, this._buffer);
+            };
+            FileStreamWriter.prototype.flushAsync = function (callback) {
+                this._fs.writeFile(this.path, this._buffer, function (err) {
+                    if(err) {
+                        throw err;
+                    }
+                    callback();
+                });
+            };
+            FileStreamWriter.prototype.close = function () {
+            };
+            return FileStreamWriter;
+        })(System.IO.StreamWriter);        
+        var FileHandle = (function () {
+            function FileHandle() {
+                this._fs = require('fs');
+            }
+            FileHandle.prototype.readFile = function (file) {
+                var buffer = this._fs.readFileSync(file);
+                switch(buffer[0]) {
+                    case 254: {
+                        if(buffer[1] == 255) {
+                            var i = 0;
+                            while((i + 1) < buffer.length) {
+                                var temp = buffer[i];
+                                buffer[i] = buffer[i + 1];
+                                buffer[i + 1] = temp;
+                                i += 2;
+                            }
+                            return buffer.toString("ucs2", 2);
+                        }
+                        break;
+
+                    }
+                    case 255: {
+                        if(buffer[1] == 254) {
+                            return buffer.toString("ucs2", 2);
+                        }
+                        break;
+
+                    }
+                    case 239: {
+                        if(buffer[1] == 187) {
+                            return buffer.toString("utf8", 3);
+                        }
+
+                    }
+                }
+                return buffer.toString();
+            };
+            FileHandle.prototype.createFile = function (path) {
+                this._fs.writeFileSync(path, '');
+                return new FileStreamWriter(path);
+            };
+            FileHandle.prototype.deleteFile = function (path) {
+                try  {
+                    this._fs.unlinkSync(path);
+                } catch (e) {
+                }
+            };
+            FileHandle.prototype.fileExists = function (path) {
+                return this._fs.existsSync(path);
+            };
+            return FileHandle;
+        })();
+        IO.FileHandle = FileHandle;        
+    })(System.IO || (System.IO = {}));
+    var IO = System.IO;
+})(System || (System = {}));
+var System;
+(function (System) {
+    (function (IO) {
+        var Directory = (function () {
+            function Directory() {
+                this._fs = require('fs');
+                this._path = require('path');
+            }
+            Directory.prototype.directoryExists = function (path) {
+                return this._fs.existsSync(path) && this._fs.lstatSync(path).isDirectory();
+            };
+            Directory.prototype.createDirectory = function (path) {
+                if(!this.directoryExists(path)) {
+                    path = path.replace('\\', '/');
+                    var parts = path.split('/');
+                    var dpath = '';
+                    for(var i = 0; i < parts.length; i++) {
+                        dpath += parts[i] + '/';
+                        if(!this.directoryExists(path)) {
+                            this._fs.mkdirSync(dpath);
+                        }
+                    }
+                }
+            };
+            Directory.prototype.dirName = function (path) {
+                return this._path.dirname(path);
+            };
+            Directory.prototype.getFiles = function (path, spec, options) {
+                var _this = this;
+                options = options || {
+                };
+                var filesInFolder = function (folder) {
+                    var paths = [];
+                    var files = _this._fs.readdirSync(folder);
+                    for(var i = 0; i < files.length; i++) {
+                        var stat = _this._fs.statSync(folder + "/" + files[i]);
+                        if(options.recursive && stat.isDirectory()) {
+                            paths = paths.concat(filesInFolder(folder + "/" + files[i]));
+                        } else {
+                            if(stat.isFile() && (!spec || files[i].match(spec))) {
+                                paths.push(folder + "/" + files[i]);
+                            }
+                        }
+                    }
+                    return paths;
+                };
+                return filesInFolder(path);
+            };
+            Directory.prototype.getFolders = function (path) {
+                var paths = [];
+                var files = this._fs.readdirSync(path);
+                for(var i = 0; i < files.length; i++) {
+                    var stat = this._fs.statSync(path + "/" + files[i]);
+                    if(stat.isDirectory()) {
+                        paths.push(files[i]);
+                    }
+                }
+                return paths;
+            };
+            return Directory;
+        })();
+        IO.Directory = Directory;        
+    })(System.IO || (System.IO = {}));
+    var IO = System.IO;
+})(System || (System = {}));
 var Site;
 (function (Site) {
     var SiteHub = (function () {
         function SiteHub() {
             this.MAIN_PLUGIN_FILE = '/main.js';
-            this.fs = require('fs');
             this.jade = require('jade');
             this.fs3 = require('./libs/fs.removeRecursive');
             this.enumerable = require('./libs/linq');
@@ -580,23 +783,80 @@ var Site;
             }
         };
         SiteHub.prototype.loadPlugins = function () {
-            var itens = this.fs.readdirSync(this.config.folders.plugins);
+            var itens = new System.IO.Directory().getFolders(this.config.folders.plugins);
             for(var i = 0; i < itens.length; i++) {
                 var item = itens[i];
                 var plugin = require(this.config.folders.current + '/' + this.config.folders.plugins + '/' + item + this.MAIN_PLUGIN_FILE);
                 this.plugins[item.toUpperCase()] = plugin;
             }
         };
+        SiteHub.prototype.getGroups = function () {
+            var groups = [];
+            if(this.pages.length > 0) {
+                for(var i = 0; i < this.pages.length; i++) {
+                    var page = this.pages[i];
+                    if(!groups[page.header.group]) {
+                        groups[page.header.group] = [];
+                    }
+                    groups[page.header.group].push(page);
+                }
+                for(var key in groups) {
+                    var group = groups[key];
+                    for(var k = 0; k < group.length; k++) {
+                        if(k > 0) {
+                            group[k].previous = group[k - 1];
+                        }
+                        if(k < group.length) {
+                            group[k].next = group[k + 1];
+                        }
+                    }
+                }
+            }
+            return groups;
+        };
+        SiteHub.prototype.getLastPageFromDefaultGroup = function () {
+            return this.getGroups()[this.config.defaultGroup][0];
+        };
+        SiteHub.prototype.getTags = function () {
+            var tags = {
+            };
+            for(var i = 0; i < this.pages.length; i++) {
+                var page = this.pages[i];
+                if(page.header.tags.length > 0) {
+                    for(var j = 0; j < page.header.tags.length; j++) {
+                        var tag = page.header.tags[j];
+                        if(!tags[tag]) {
+                            tags[tag] = [];
+                        }
+                        tags[tag].push(page);
+                    }
+                }
+            }
+            return tags;
+        };
+        SiteHub.prototype.getCategories = function () {
+            var categories = {
+            };
+            for(var i = 0; i < this.pages.length; i++) {
+                var page = this.pages[i];
+                if(!categories[page.header.category]) {
+                    categories[page.header.category] = [];
+                }
+                categories[page.header.category].push(page);
+            }
+            return categories;
+        };
         SiteHub.prototype.loadPages = function () {
-            var files = this.fs.readdirSync(this.config.folders.content);
+            var files = new System.IO.Directory().getFiles(this.config.folders.content);
             if(files.length > 0) {
                 files = this.enumerable.From(files).Reverse().ToArray();
                 for(var i = 0; i < files.length; i++) {
-                    var siteFile = new Site.SiteFile(files[i]);
+                    var file = files[i].substr(this.config.folders.content.length + 1);
+                    var siteFile = new Site.SiteFile(file);
                     if(siteFile.header['engine']) {
                         var engine = siteFile.header['engine'];
                         if(engine == 'blog') {
-                            var page = new Site.Blog.BlogPage(this, files[i], siteFile);
+                            var page = new Site.Blog.BlogPage(this, file, siteFile);
                             this.pages.push(page);
                         } else {
                             if(engine == 'doc') {
@@ -612,12 +872,13 @@ var Site;
         SiteHub.prototype.getPage = function (page) {
             var fileContent = null;
             try  {
-                fileContent = this.fs.readFileSync(page, this.config.fileEncode);
+                fileContent = new System.IO.FileHandle().readFile(page);
             } catch (err) {
                 console.error("There was an error opening the file:");
                 console.log(err);
             }
             var render = this.jade.compile(fileContent, {
+                compileDebug: true,
                 filename: this.config.folders.theme + '/tmpl'
             });
             return new Source(render({
@@ -628,7 +889,7 @@ var Site;
         SiteHub.prototype.getAtom = function () {
             var fileContent = null;
             try  {
-                fileContent = this.fs.readFileSync('./atom.jade', this.config.fileEncode);
+                fileContent = new System.IO.FileHandle().readFile('./atom.jade');
             } catch (err) {
                 console.error("There was an error opening the file:");
                 console.log(err);
@@ -643,10 +904,11 @@ var Site;
         };
         SiteHub.prototype.getJadePages = function () {
             var pages = [];
-            var itens = this.fs.readdirSync('./' + this.config.folders.theme);
+            var itens = new System.IO.Directory().getFiles('./' + this.config.folders.theme);
             for(var i = 0; i < itens.length; i++) {
-                if(itens[i].substr(itens[i].lastIndexOf('.')).toUpperCase() == '.JADE') {
-                    pages.push(itens[i]);
+                var item = itens[i].substr(this.config.folders.theme.length + 2);
+                if(item.substr(item.lastIndexOf('.')).toUpperCase() == '.JADE') {
+                    pages.push(item);
                 }
             }
             return pages;

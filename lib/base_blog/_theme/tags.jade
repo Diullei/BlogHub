@@ -8,16 +8,7 @@ block header
 
 block content
 	div.span12
-		- var tags = {};
-		- for (var i = 0; i < main.pages.length; i++)
-			- var page = main.pages[i];
-			- if (page.header.tags.length > 0)
-				- for (var j = 0; j < page.header.tags.length; j++)
-					- var tag = page.header.tags[j];
-					- if (!tags[tag])
-						- tags[tag] = [];
-					- tags[tag].push(page);
-
+		- var tags = main.getTags();
 		ul.tag_box.inline
 			- for (var tag in tags)
 				li

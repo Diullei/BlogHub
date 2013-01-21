@@ -1,30 +1,12 @@
 ﻿extends tmpl/master
 
 block title
-	- var groups = [];
-	- if (main.pages.length > 0)
-		- for (var i = 0; i < main.pages.length; i++)
-			- var page = main.pages[i];
-
-			- if (!groups[page.header.group])
-				- groups[page.header.group] = [];
-
-			- groups[page.header.group].push(page);
-
-		- for (var key in groups)
-			- var group = groups[key];
-
-			- for (var k = 0; k < group.length; k++)
-				- if (k > 0)
-					- group[k].previous = group[k - 1];
-				- if (k < group.length)
-					- group[k].next = group[k + 1];
-			
-	- var page = groups[config.defaultGroup][0];
+	- var page = main.getLastPageFromDefaultGroup();
 	| #{page.header.title}
 
 block header
-	| #{config.tagLine}
+	| #{config.title} 
+	small #{config.tagLine}
 
 block content
 	div.span12
@@ -44,5 +26,3 @@ block content
 						a(href='#{(config.folders.basePath ? config.folders.basePath : '' ) 
 							+ main.pages[i].url
 							+ (config.folders.basePath ? 'index.html' : '' )}', title='#{main.pages[i].title}') #{main.pages[i].header.title}
-
-		// comments
