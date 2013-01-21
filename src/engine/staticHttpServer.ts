@@ -10,7 +10,6 @@
 ///<reference path='config.ts'/>
 
 class StaticHttpServer { 
-    private fs = require('fs');
     private express = require('express');
     private server: any;
     private config: Config;

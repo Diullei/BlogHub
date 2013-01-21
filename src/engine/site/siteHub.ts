@@ -14,11 +14,8 @@ module Site {
 
     export class SiteHub {
         private MAIN_PLUGIN_FILE = '/main.js';
-        //private fs = require('fs');
         private jade = require('jade');
-        private fs3 = require('./libs/fs.removeRecursive');
         private enumerable = require('./libs/linq');
-        private ncp = require('ncp').ncp;
         private config: Config;
 
         public pages: Site.SiteBase[] = [];
@@ -41,7 +38,6 @@ module Site {
 
         private loadPlugins() {
             var itens = new System.IO.Directory().getFolders(this.config.folders.plugins);
-            //var itens = this.fs.readdirSync(this.config.folders.plugins);
             for (var i = 0; i < itens.length; i++) {
                 var item = itens[i];
                 var plugin = require(this.config.folders.current + '/' + this.config.folders.plugins + '/' + item + this.MAIN_PLUGIN_FILE);
@@ -111,7 +107,6 @@ module Site {
 
         private loadPages() {
             var files = new System.IO.Directory().getFiles(this.config.folders.content);
-            //var files = this.fs.readdirSync(this.config.folders.content);
             if (files.length > 0) {
                 files = this.enumerable.From(files).Reverse().ToArray();
                 for (var i = 0; i < files.length; i++) {
@@ -136,7 +131,6 @@ module Site {
             var fileContent = null;
             try {
                 fileContent = new System.IO.FileHandle().readFile(page);
-                //fileContent = this.fs.readFileSync(page, this.config.fileEncode);
             }
             catch (err) {
                 console.error("There was an error opening the file:");
@@ -152,7 +146,6 @@ module Site {
             var fileContent = null;
             try {
                 fileContent = new System.IO.FileHandle().readFile('./atom.jade');
-                //fileContent = this.fs.readFileSync('./atom.jade', this.config.fileEncode);
             }
             catch (err) {
                 console.error("There was an error opening the file:");
@@ -167,7 +160,6 @@ module Site {
         public getJadePages(): string[] {
             var pages: string[] = [];
             var itens = new System.IO.Directory().getFiles('./' + this.config.folders.theme);
-            //var itens = this.fs.readdirSync('./' + this.config.folders.theme);
             for (var i = 0; i < itens.length; i++) {
                 var item = itens[i].substr(this.config.folders.theme.length + 2);
                 if (item.substr(item.lastIndexOf('.')).toUpperCase() == '.JADE') {
@@ -181,7 +173,7 @@ module Site {
             for (var i = 0; i < this.config.copyFolders.length; i++) { 
                 var folder = this.config.copyFolders[i];
                 BlogHubDiagnostics.info('[Create] folder: ' + folder);
-                this.ncp('./' + this.config.folders.theme + '/' + folder, './' + this.config.folders.site + '/' + folder, function (err) { if (err) { return console.error(err); } });
+                new System.IO.Directory().copy('./' + this.config.folders.theme + '/' + folder, './' + this.config.folders.site + '/' + folder);
             }
         }
 
@@ -231,10 +223,9 @@ module Site {
                 this.buildPages();
 
                 BlogHubDiagnostics.info('Remove site folder');
-                this.fs3.removeRecursive('./' + this.config.folders.site, (err, status) => {
-                    this.savePages();
-                    this.copyThemeFolders();
-                });
+                new System.IO.Directory().remove('./' + this.config.folders.site);
+                this.savePages();
+                this.copyThemeFolders();
             }
         }
     }

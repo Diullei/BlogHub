@@ -74,6 +74,13 @@ module System.IO {
             return new FileStreamWriter(path);
         }
 
+        public save(name: string, content: string): void { 
+            var sw = this.createFile(name);
+            sw.write(content);
+            sw.flush();
+            sw.close();
+        }
+
         public deleteFile(path): void {
             try {
                 this._fs.unlinkSync(path);

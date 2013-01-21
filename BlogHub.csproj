@@ -37,46 +37,46 @@
     <Content Include="bin\libs\showdown.js" />
     <Content Include="definition\linq-2.2.d.ts" />
     <Content Include="definition\node-0.8.d.ts" />
-    <Content Include="lib\base_blog\_theme\css\bootstrap-responsive.css" />
-    <Content Include="lib\base_blog\_theme\css\bootstrap-responsive.min.css" />
-    <Content Include="lib\base_blog\_theme\css\bootstrap.css" />
-    <Content Include="lib\base_blog\_theme\css\bootstrap.min.css" />
-    <Content Include="lib\base_blog\_theme\css\style.css" />
-    <Content Include="lib\base_blog\_theme\img\glyphicons-halflings-white.png" />
-    <Content Include="lib\base_blog\_theme\img\glyphicons-halflings.png" />
-    <Content Include="lib\base_blog\_theme\js\bootstrap.js" />
-    <Content Include="lib\base_blog\_theme\js\bootstrap.min.js" />
-    <Content Include="lib\blogHub.ts" />
-    <Content Include="lib\engine\blogHubDiagnostics.ts" />
-    <Content Include="lib\engine\config.ts" />
-    <Content Include="lib\engine\io.ts" />
-    <Content Include="lib\engine\print.ts" />
-    <Content Include="lib\engine\main.ts" />
-    <Content Include="lib\engine\optionsParser.ts" />
-    <Content Include="lib\engine\site\siteBase.ts" />
-    <Content Include="lib\engine\site\blog\blogPage.ts" />
-    <Content Include="lib\engine\site\siteFile.ts" />
-    <Content Include="lib\engine\site\siteHub.ts" />
-    <Content Include="lib\engine\source.ts" />
-    <Content Include="lib\engine\staticHttpServer.ts" />
-    <Content Include="lib\engine\system\idisposable.ts" />
-    <Content Include="lib\engine\system\io\directory.ts" />
-    <Content Include="lib\engine\system\io\fileHandle.ts" />
-    <Content Include="lib\engine\system\io\itextWriter.ts" />
-    <Content Include="lib\engine\system\io\streamWriter.ts" />
+    <Content Include="src\base_blog\_theme\css\bootstrap-responsive.css" />
+    <Content Include="src\base_blog\_theme\css\bootstrap-responsive.min.css" />
+    <Content Include="src\base_blog\_theme\css\bootstrap.css" />
+    <Content Include="src\base_blog\_theme\css\bootstrap.min.css" />
+    <Content Include="src\base_blog\_theme\css\style.css" />
+    <Content Include="src\base_blog\_theme\img\glyphicons-halflings-white.png" />
+    <Content Include="src\base_blog\_theme\img\glyphicons-halflings.png" />
+    <Content Include="src\base_blog\_theme\js\bootstrap.js" />
+    <Content Include="src\base_blog\_theme\js\bootstrap.min.js" />
+    <Content Include="src\blogHub.ts" />
+    <Content Include="src\engine\blogHubDiagnostics.ts" />
+    <Content Include="src\engine\config.ts" />
+    <Content Include="src\engine\io.ts" />
+    <Content Include="src\engine\print.ts" />
+    <Content Include="src\engine\main.ts" />
+    <Content Include="src\engine\optionsParser.ts" />
+    <Content Include="src\engine\site\siteBase.ts" />
+    <Content Include="src\engine\site\blog\blogPage.ts" />
+    <Content Include="src\engine\site\siteFile.ts" />
+    <Content Include="src\engine\site\siteHub.ts" />
+    <Content Include="src\engine\source.ts" />
+    <Content Include="src\engine\staticHttpServer.ts" />
+    <Content Include="src\engine\system\idisposable.ts" />
+    <Content Include="src\engine\system\io\directory.ts" />
+    <Content Include="src\engine\system\io\fileHandle.ts" />
+    <Content Include="src\engine\system\io\itextWriter.ts" />
+    <Content Include="src\engine\system\io\streamWriter.ts" />
     <Content Include="themes\single\css\ie.css" />
     <Content Include="themes\single\css\style.css" />
-    <None Include="lib\base_blog\atom.jade" />
-    <None Include="lib\base_blog\_theme\categories.jade" />
-    <None Include="lib\base_blog\_theme\index.jade" />
-    <None Include="lib\base_blog\_theme\pages.jade" />
-    <None Include="lib\base_blog\_theme\tags.jade" />
-    <None Include="lib\base_blog\_theme\tmpl\post.jade" />
-    <None Include="lib\base_blog\_theme\inc\footer.jade" />
-    <None Include="lib\base_blog\_theme\inc\header.jade" />
-    <None Include="lib\base_blog\_theme\inc\scripts.jade" />
-    <Content Include="lib\base_blog\_plugins\GroupPaginator\main.ts" />
-    <None Include="lib\base_blog\_plugins\GroupPaginator\template.jade" />
+    <None Include="src\base_blog\atom.jade" />
+    <None Include="src\base_blog\_theme\categories.jade" />
+    <None Include="src\base_blog\_theme\index.jade" />
+    <None Include="src\base_blog\_theme\pages.jade" />
+    <None Include="src\base_blog\_theme\tags.jade" />
+    <None Include="src\base_blog\_theme\tmpl\post.jade" />
+    <None Include="src\base_blog\_theme\inc\footer.jade" />
+    <None Include="src\base_blog\_theme\inc\header.jade" />
+    <None Include="src\base_blog\_theme\inc\scripts.jade" />
+    <Content Include="src\base_blog\_plugins\GroupPaginator\main.ts" />
+    <None Include="src\base_blog\_plugins\GroupPaginator\template.jade" />
     <Content Include="test\files\blog\templates\index.html" />
     <Content Include="test\site_test.ts" />
     <Content Include="themes\single\css\f.css" />
@@ -89,27 +89,27 @@
     <None Include="themes\single\tmpl\post.jade" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="lib\base_blog\_config.json" />
-    <None Include="lib\base_blog\_content\2011-02-16-fsharp-programacao-funcional.md" />
-    <None Include="lib\base_blog\_content\2012-09-20-Configurando-o-NodeJs-com-o-Npp.md" />
-    <None Include="lib\base_blog\_content\2012-09-27-Debugando-TyprScript-no-navegador.md" />
-    <None Include="lib\base_blog\_content\2012-09-30-Introducao-ao-TypeScript.md" />
-    <None Include="lib\base_blog\_content\2012-10-01-JavaScript-NoConflict.md" />
-    <None Include="lib\base_blog\_content\2012-11-11-Lendo-arquivos-com-Nodejs.md" />
-    <None Include="lib\base_blog\_theme\tmpl\master.jade" />
+    <None Include="src\base_blog\_config.json" />
+    <None Include="src\base_blog\_content\2011-02-16-fsharp-programacao-funcional.md" />
+    <None Include="src\base_blog\_content\2012-09-20-Configurando-o-NodeJs-com-o-Npp.md" />
+    <None Include="src\base_blog\_content\2012-09-27-Debugando-TyprScript-no-navegador.md" />
+    <None Include="src\base_blog\_content\2012-09-30-Introducao-ao-TypeScript.md" />
+    <None Include="src\base_blog\_content\2012-10-01-JavaScript-NoConflict.md" />
+    <None Include="src\base_blog\_content\2012-11-11-Lendo-arquivos-com-Nodejs.md" />
+    <None Include="src\base_blog\_theme\tmpl\master.jade" />
     <None Include="test\files\blog\2013-01-05-site-name.md" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="lib\base_blog\_src\" />
-    <Folder Include="lib\engine\site\doc\" />
     <Folder Include="Properties\" />
+    <Folder Include="src\base_blog\_src\" />
+    <Folder Include="src\engine\site\doc\" />
     <Folder Include="themes\single\img\" />
     <Folder Include="themes\single\js\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>tsc $(ProjectDir)lib/blogHub.ts --out $(ProjectDir)bin/main.js --target es5
-tsc $(ProjectDir)lib/base_blog/_plugins/GroupPaginator/main.ts --target es5</PostBuildEvent>
+    <PostBuildEvent>tsc $(ProjectDir)src/blogHub.ts --out $(ProjectDir)bin/main.js --target es5
+tsc $(ProjectDir)src/base_blog/_plugins/GroupPaginator/main.ts --target es5</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

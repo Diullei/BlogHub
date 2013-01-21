@@ -9,7 +9,6 @@
 ///<reference path='../siteBase.ts'/>
 ///<reference path='../siteHub.ts'/>
 ///<reference path='../../print.ts'/>
-///<reference path='../../io.ts'/>
 
 module Site.Blog {
 
@@ -17,12 +16,8 @@ module Site.Blog {
         private CURRENT_FOLDER = './';
 
         public exec() { 
-            IO.copyFolder(__dirname + '/../lib/base_blog/', this.CURRENT_FOLDER, (err) => {
-                if (err) {
-                    throw err;
-                }
-                BlogHubDiagnostics.info('blog site created');
-            });
+            new System.IO.Directory().copy(__dirname + '/../src/base_blog/', this.CURRENT_FOLDER);
+            BlogHubDiagnostics.info('Blog site created');
         }
     }
 

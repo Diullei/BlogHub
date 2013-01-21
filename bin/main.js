@@ -86,20 +86,314 @@ var Site;
     })();
     Site.SiteFile = SiteFile;    
 })(Site || (Site = {}));
+var System;
+(function (System) {
+    })(System || (System = {}));
+var System;
+(function (System) {
+    (function (IO) {
+        var StreamWriter = (function () {
+            function StreamWriter() {
+                this.autoFlush = true;
+            }
+            StreamWriter.prototype.flush = function () {
+                throw new Error("Not Implemented Exception");
+            };
+            StreamWriter.prototype.flushAsync = function (callback) {
+                throw new Error("Not Implemented Exception");
+            };
+            StreamWriter.prototype.write = function (value) {
+                if(!this._buffer) {
+                    this._buffer = '';
+                }
+                this._buffer += value;
+                if(this.autoFlush) {
+                    this.flush();
+                    this._buffer = null;
+                }
+            };
+            StreamWriter.prototype.writeLine = function (value) {
+                this.write(value + '\n');
+            };
+            StreamWriter.prototype.writeAsync = function (value, callback) {
+                var _this = this;
+                if(!this._buffer) {
+                    this._buffer = '';
+                }
+                this._buffer += value;
+                if(this.autoFlush) {
+                    this.flushAsync(function () {
+                        _this._buffer = null;
+                        callback();
+                    });
+                }
+            };
+            StreamWriter.prototype.writeLineAsync = function (value, callback) {
+                this.writeAsync(value + '\n', callback);
+            };
+            StreamWriter.prototype.dispose = function () {
+                throw new Error("Not Implemented Exception");
+            };
+            StreamWriter.prototype.close = function () {
+                throw new Error("Not Implemented Exception");
+            };
+            return StreamWriter;
+        })();
+        IO.StreamWriter = StreamWriter;        
+    })(System.IO || (System.IO = {}));
+    var IO = System.IO;
+})(System || (System = {}));
+var __extends = this.__extends || function (d, b) {
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var System;
+(function (System) {
+    (function (IO) {
+        var FileStreamWriter = (function (_super) {
+            __extends(FileStreamWriter, _super);
+            function FileStreamWriter(path) {
+                        _super.call(this);
+                this.path = path;
+                this._fs = require('fs');
+                this.autoFlush = false;
+            }
+            FileStreamWriter.prototype.flush = function () {
+                this._fs.appendFileSync(this.path, this._buffer);
+            };
+            FileStreamWriter.prototype.flushAsync = function (callback) {
+                this._fs.writeFile(this.path, this._buffer, function (err) {
+                    if(err) {
+                        throw err;
+                    }
+                    callback();
+                });
+            };
+            FileStreamWriter.prototype.close = function () {
+            };
+            return FileStreamWriter;
+        })(System.IO.StreamWriter);        
+        var FileHandle = (function () {
+            function FileHandle() {
+                this._fs = require('fs');
+            }
+            FileHandle.prototype.readFile = function (file) {
+                var buffer = this._fs.readFileSync(file);
+                switch(buffer[0]) {
+                    case 254: {
+                        if(buffer[1] == 255) {
+                            var i = 0;
+                            while((i + 1) < buffer.length) {
+                                var temp = buffer[i];
+                                buffer[i] = buffer[i + 1];
+                                buffer[i + 1] = temp;
+                                i += 2;
+                            }
+                            return buffer.toString("ucs2", 2);
+                        }
+                        break;
+
+                    }
+                    case 255: {
+                        if(buffer[1] == 254) {
+                            return buffer.toString("ucs2", 2);
+                        }
+                        break;
+
+                    }
+                    case 239: {
+                        if(buffer[1] == 187) {
+                            return buffer.toString("utf8", 3);
+                        }
+
+                    }
+                }
+                return buffer.toString();
+            };
+            FileHandle.prototype.createFile = function (path) {
+                this._fs.writeFileSync(path, '');
+                return new FileStreamWriter(path);
+            };
+            FileHandle.prototype.save = function (name, content) {
+                var sw = this.createFile(name);
+                sw.write(content);
+                sw.flush();
+                sw.close();
+            };
+            FileHandle.prototype.deleteFile = function (path) {
+                try  {
+                    this._fs.unlinkSync(path);
+                } catch (e) {
+                }
+            };
+            FileHandle.prototype.fileExists = function (path) {
+                return this._fs.existsSync(path);
+            };
+            return FileHandle;
+        })();
+        IO.FileHandle = FileHandle;        
+    })(System.IO || (System.IO = {}));
+    var IO = System.IO;
+})(System || (System = {}));
+var System;
+(function (System) {
+    (function (IO) {
+        var Directory = (function () {
+            function Directory() {
+                this._fs = require('fs');
+                this._path = require('path');
+            }
+            Directory.prototype.directoryExists = function (path) {
+                return this._fs.existsSync(path) && this._fs.lstatSync(path).isDirectory();
+            };
+            Directory.prototype.createDirectory = function (path) {
+                path = path.replace(/\\/g, '/');
+                path = path.replace('//', '/');
+                if(!this.directoryExists(path)) {
+                    var parts = path.split('/');
+                    var dpath = '';
+                    for(var i = 0; i < parts.length; i++) {
+                        dpath += parts[i] + '/';
+                        if(!this.directoryExists(dpath)) {
+                            this._fs.mkdirSync(dpath);
+                        }
+                    }
+                }
+            };
+            Directory.prototype.dirName = function (path) {
+                return this._path.dirname(path);
+            };
+            Directory.prototype.getFiles = function (path, spec, options) {
+                var _this = this;
+                options = options || {
+                };
+                var filesInFolder = function (folder) {
+                    var paths = [];
+                    var files = _this._fs.readdirSync(folder);
+                    for(var i = 0; i < files.length; i++) {
+                        var stat = _this._fs.statSync(folder + "/" + files[i]);
+                        if(options.recursive && stat.isDirectory()) {
+                            paths = paths.concat(filesInFolder(folder + "/" + files[i]));
+                        } else {
+                            if(stat.isFile() && (!spec || files[i].match(spec))) {
+                                paths.push(folder + "/" + files[i]);
+                            }
+                        }
+                    }
+                    return paths;
+                };
+                return filesInFolder(path);
+            };
+            Directory.prototype.getFolders = function (path) {
+                var paths = [];
+                var files = this._fs.readdirSync(path);
+                for(var i = 0; i < files.length; i++) {
+                    var stat = this._fs.statSync(path + "/" + files[i]);
+                    if(stat.isDirectory()) {
+                        paths.push(files[i]);
+                    }
+                }
+                return paths;
+            };
+            Directory.prototype.remove = function (path) {
+                var rmDir = function (dirPath) {
+                    try  {
+                        var files = this._fs.readdirSync(dirPath);
+                    } catch (e) {
+                        return;
+                    }
+                    if(files.length > 0) {
+                        for(var i = 0; i < files.length; i++) {
+                            var filePath = dirPath + '/' + files[i];
+                            if(this._fs.statSync(filePath).isFile()) {
+                                this._fs.unlinkSync(filePath);
+                            } else {
+                                rmDir(filePath);
+                            }
+                        }
+                    }
+                    this._fs.rmdirSync(dirPath);
+                };
+            };
+            Directory.prototype.copy = function (sourceDir, newDirLocation, opts) {
+                var _this = this;
+                if(!opts || !opts.preserve) {
+                    try  {
+                        if(this._fs.statSync(newDirLocation).isDirectory()) {
+                            exports.rmdirSyncRecursive(newDirLocation);
+                        }
+                    } catch (e) {
+                    }
+                }
+                var checkDir = this._fs.statSync(sourceDir);
+                try  {
+                    this._fs.mkdirSync(newDirLocation, checkDir.mode);
+                } catch (e) {
+                    if(e.code !== 'EEXIST') {
+                        throw e;
+                    }
+                }
+                var files = this._fs.readdirSync(sourceDir);
+                for(var i = 0; i < files.length; i++) {
+                    if(typeof opts !== 'undefined') {
+                        if(!opts.whitelist && opts.filter && files[i].match(opts.filter)) {
+                            continue;
+                        }
+                        if(opts.whitelist && opts.filter && !files[i].match(opts.filter)) {
+                            continue;
+                        }
+                        if(opts.excludeHiddenUnix && /^\./.test(files[i])) {
+                            continue;
+                        }
+                    }
+                    var currFile = this._fs.lstatSync(this._path.join(sourceDir, files[i]));
+                    var fCopyFile = function (srcFile, destFile) {
+                        if(typeof opts !== 'undefined' && opts.preserveFiles && _this._fs.existsSync(destFile)) {
+                            return;
+                        }
+                        var contents = _this._fs.readFileSync(srcFile);
+                        _this._fs.writeFileSync(destFile, contents);
+                    };
+                    if(currFile.isDirectory()) {
+                        this.copy(this._path.join(sourceDir, files[i]), this._path.join(newDirLocation, files[i]), opts);
+                    } else {
+                        if(currFile.isSymbolicLink()) {
+                            var symlinkFull = this._fs.readlinkSync(this._path.join(sourceDir, files[i]));
+                            if(typeof opts !== 'undefined' && !opts.inflateSymlinks) {
+                                this._fs.symlinkSync(symlinkFull, this._path.join(newDirLocation, files[i]));
+                                continue;
+                            }
+                            var tmpCurrFile = this._fs.lstatSync(this._path.join(sourceDir, symlinkFull));
+                            if(tmpCurrFile.isDirectory()) {
+                                this.copy(this._path.join(sourceDir, symlinkFull), this._path.join(newDirLocation, files[i]), opts);
+                            } else {
+                                fCopyFile(this._path.join(sourceDir, symlinkFull), this._path.join(newDirLocation, files[i]));
+                            }
+                        } else {
+                            fCopyFile(this._path.join(sourceDir, files[i]), this._path.join(newDirLocation, files[i]));
+                        }
+                    }
+                }
+            };
+            return Directory;
+        })();
+        IO.Directory = Directory;        
+    })(System.IO || (System.IO = {}));
+    var IO = System.IO;
+})(System || (System = {}));
 var Source = (function () {
     function Source(content, path) {
         this.content = content;
         this.path = path;
-        this.fs = require('fs');
-        this.fs2 = require('./libs/node-fs');
     }
     Source.prototype.save = function (encode) {
-        this.fs2.mkdirSync(this.path, 777, true);
-        this.fs.writeFileSync(this.path + 'index.html', this.content, encode);
+        new System.IO.Directory().createDirectory(this.path);
+        new System.IO.FileHandle().save(this.path + 'index.html', this.content);
     };
     Source.prototype.saveToPath = function (path, fileName, encode) {
-        this.fs2.mkdirSync(path, 777, true);
-        this.fs.writeFileSync(path + '/' + fileName, this.content, encode);
+        new System.IO.Directory().createDirectory(path);
+        new System.IO.FileHandle().save(path + '/' + fileName, this.content);
     };
     return Source;
 })();
@@ -160,38 +454,6 @@ var Print = (function () {
     }
     return Print;
 })();
-var IO = (function () {
-    function IO() { }
-    IO.fs = require('fs');
-    IO.ncp = require('ncp').ncp;
-    IO.fs2 = require('./libs/node-fs');
-    IO.readFileSync = function readFileSync(file) {
-        var fileContent = null;
-        try  {
-            return fileContent = this.fs.readFileSync(file);
-        } catch (err) {
-            throw new ConfigFileNotFoundException();
-        }
-    }
-    IO.readJsonFile = function readJsonFile(file) {
-        var fileContent = IO.readFileSync(file);
-        return JSON.parse(fileContent);
-    }
-    IO.readDirSync = function readDirSync(path) {
-        return IO.fs.readdirSync(path);
-    }
-    IO.copyFolder = function copyFolder(folder, destination, callback) {
-        IO.ncp(folder, destination, function (err) {
-            callback(err);
-        });
-    }
-    return IO;
-})();
-var __extends = this.__extends || function (d, b) {
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
 var Site;
 (function (Site) {
     (function (Blog) {
@@ -200,12 +462,8 @@ var Site;
                 this.CURRENT_FOLDER = './';
             }
             Builder.prototype.exec = function () {
-                IO.copyFolder(__dirname + '/../lib/base_blog/', this.CURRENT_FOLDER, function (err) {
-                    if(err) {
-                        throw err;
-                    }
-                    BlogHubDiagnostics.info('blog site created');
-                });
+                new System.IO.Directory().copy(__dirname + '/../src/base_blog/', this.CURRENT_FOLDER);
+                BlogHubDiagnostics.info('Blog site created');
             };
             return Builder;
         })();
@@ -328,6 +586,33 @@ var Site;
     })(Site.Blog || (Site.Blog = {}));
     var Blog = Site.Blog;
 })(Site || (Site = {}));
+var IO = (function () {
+    function IO() { }
+    IO.fs = require('fs');
+    IO.ncp = require('ncp').ncp;
+    IO.fs2 = require('./libs/node-fs');
+    IO.readFileSync = function readFileSync(file) {
+        var fileContent = null;
+        try  {
+            return fileContent = this.fs.readFileSync(file);
+        } catch (err) {
+            throw new ConfigFileNotFoundException();
+        }
+    }
+    IO.readJsonFile = function readJsonFile(file) {
+        var fileContent = IO.readFileSync(file);
+        return JSON.parse(fileContent);
+    }
+    IO.readDirSync = function readDirSync(path) {
+        return IO.fs.readdirSync(path);
+    }
+    IO.copyFolder = function copyFolder(folder, destination, callback) {
+        IO.ncp(folder, destination, function (err) {
+            callback(err);
+        });
+    }
+    return IO;
+})();
 var ConfigPropertyNotFoundException = (function () {
     function ConfigPropertyNotFoundException(key) {
         this.message = "Config property: '" + key + "' not found";
@@ -555,219 +840,13 @@ var Config = (function () {
     };
     return Config;
 })();
-var System;
-(function (System) {
-    })(System || (System = {}));
-var System;
-(function (System) {
-    (function (IO) {
-        var StreamWriter = (function () {
-            function StreamWriter() {
-                this.autoFlush = true;
-            }
-            StreamWriter.prototype.flush = function () {
-                throw new Error("Not Implemented Exception");
-            };
-            StreamWriter.prototype.flushAsync = function (callback) {
-                throw new Error("Not Implemented Exception");
-            };
-            StreamWriter.prototype.write = function (value) {
-                if(!this._buffer) {
-                    this._buffer = '';
-                }
-                this._buffer += value;
-                if(this.autoFlush) {
-                    this.flush();
-                    this._buffer = null;
-                }
-            };
-            StreamWriter.prototype.writeLine = function (value) {
-                this.write(value + '\n');
-            };
-            StreamWriter.prototype.writeAsync = function (value, callback) {
-                var _this = this;
-                if(!this._buffer) {
-                    this._buffer = '';
-                }
-                this._buffer += value;
-                if(this.autoFlush) {
-                    this.flushAsync(function () {
-                        _this._buffer = null;
-                        callback();
-                    });
-                }
-            };
-            StreamWriter.prototype.writeLineAsync = function (value, callback) {
-                this.writeAsync(value + '\n', callback);
-            };
-            StreamWriter.prototype.dispose = function () {
-                throw new Error("Not Implemented Exception");
-            };
-            StreamWriter.prototype.close = function () {
-                throw new Error("Not Implemented Exception");
-            };
-            return StreamWriter;
-        })();
-        IO.StreamWriter = StreamWriter;        
-    })(System.IO || (System.IO = {}));
-    var IO = System.IO;
-})(System || (System = {}));
-var System;
-(function (System) {
-    (function (IO) {
-        var FileStreamWriter = (function (_super) {
-            __extends(FileStreamWriter, _super);
-            function FileStreamWriter(path) {
-                        _super.call(this);
-                this.path = path;
-                this._fs = require('fs');
-                this.autoFlush = false;
-            }
-            FileStreamWriter.prototype.flush = function () {
-                this._fs.appendFileSync(this.path, this._buffer);
-            };
-            FileStreamWriter.prototype.flushAsync = function (callback) {
-                this._fs.writeFile(this.path, this._buffer, function (err) {
-                    if(err) {
-                        throw err;
-                    }
-                    callback();
-                });
-            };
-            FileStreamWriter.prototype.close = function () {
-            };
-            return FileStreamWriter;
-        })(System.IO.StreamWriter);        
-        var FileHandle = (function () {
-            function FileHandle() {
-                this._fs = require('fs');
-            }
-            FileHandle.prototype.readFile = function (file) {
-                var buffer = this._fs.readFileSync(file);
-                switch(buffer[0]) {
-                    case 254: {
-                        if(buffer[1] == 255) {
-                            var i = 0;
-                            while((i + 1) < buffer.length) {
-                                var temp = buffer[i];
-                                buffer[i] = buffer[i + 1];
-                                buffer[i + 1] = temp;
-                                i += 2;
-                            }
-                            return buffer.toString("ucs2", 2);
-                        }
-                        break;
-
-                    }
-                    case 255: {
-                        if(buffer[1] == 254) {
-                            return buffer.toString("ucs2", 2);
-                        }
-                        break;
-
-                    }
-                    case 239: {
-                        if(buffer[1] == 187) {
-                            return buffer.toString("utf8", 3);
-                        }
-
-                    }
-                }
-                return buffer.toString();
-            };
-            FileHandle.prototype.createFile = function (path) {
-                this._fs.writeFileSync(path, '');
-                return new FileStreamWriter(path);
-            };
-            FileHandle.prototype.deleteFile = function (path) {
-                try  {
-                    this._fs.unlinkSync(path);
-                } catch (e) {
-                }
-            };
-            FileHandle.prototype.fileExists = function (path) {
-                return this._fs.existsSync(path);
-            };
-            return FileHandle;
-        })();
-        IO.FileHandle = FileHandle;        
-    })(System.IO || (System.IO = {}));
-    var IO = System.IO;
-})(System || (System = {}));
-var System;
-(function (System) {
-    (function (IO) {
-        var Directory = (function () {
-            function Directory() {
-                this._fs = require('fs');
-                this._path = require('path');
-            }
-            Directory.prototype.directoryExists = function (path) {
-                return this._fs.existsSync(path) && this._fs.lstatSync(path).isDirectory();
-            };
-            Directory.prototype.createDirectory = function (path) {
-                if(!this.directoryExists(path)) {
-                    path = path.replace('\\', '/');
-                    var parts = path.split('/');
-                    var dpath = '';
-                    for(var i = 0; i < parts.length; i++) {
-                        dpath += parts[i] + '/';
-                        if(!this.directoryExists(path)) {
-                            this._fs.mkdirSync(dpath);
-                        }
-                    }
-                }
-            };
-            Directory.prototype.dirName = function (path) {
-                return this._path.dirname(path);
-            };
-            Directory.prototype.getFiles = function (path, spec, options) {
-                var _this = this;
-                options = options || {
-                };
-                var filesInFolder = function (folder) {
-                    var paths = [];
-                    var files = _this._fs.readdirSync(folder);
-                    for(var i = 0; i < files.length; i++) {
-                        var stat = _this._fs.statSync(folder + "/" + files[i]);
-                        if(options.recursive && stat.isDirectory()) {
-                            paths = paths.concat(filesInFolder(folder + "/" + files[i]));
-                        } else {
-                            if(stat.isFile() && (!spec || files[i].match(spec))) {
-                                paths.push(folder + "/" + files[i]);
-                            }
-                        }
-                    }
-                    return paths;
-                };
-                return filesInFolder(path);
-            };
-            Directory.prototype.getFolders = function (path) {
-                var paths = [];
-                var files = this._fs.readdirSync(path);
-                for(var i = 0; i < files.length; i++) {
-                    var stat = this._fs.statSync(path + "/" + files[i]);
-                    if(stat.isDirectory()) {
-                        paths.push(files[i]);
-                    }
-                }
-                return paths;
-            };
-            return Directory;
-        })();
-        IO.Directory = Directory;        
-    })(System.IO || (System.IO = {}));
-    var IO = System.IO;
-})(System || (System = {}));
 var Site;
 (function (Site) {
     var SiteHub = (function () {
         function SiteHub() {
             this.MAIN_PLUGIN_FILE = '/main.js';
             this.jade = require('jade');
-            this.fs3 = require('./libs/fs.removeRecursive');
             this.enumerable = require('./libs/linq');
-            this.ncp = require('ncp').ncp;
             this.pages = [];
             this.plugins = {
             };
@@ -917,11 +996,7 @@ var Site;
             for(var i = 0; i < this.config.copyFolders.length; i++) {
                 var folder = this.config.copyFolders[i];
                 BlogHubDiagnostics.info('[Create] folder: ' + folder);
-                this.ncp('./' + this.config.folders.theme + '/' + folder, './' + this.config.folders.site + '/' + folder, function (err) {
-                    if(err) {
-                        return console.error(err);
-                    }
-                });
+                new System.IO.Directory().copy('./' + this.config.folders.theme + '/' + folder, './' + this.config.folders.site + '/' + folder);
             }
         };
         SiteHub.prototype.saveAtom = function () {
@@ -955,16 +1030,14 @@ var Site;
             this.saveMdPages();
         };
         SiteHub.prototype.build = function () {
-            var _this = this;
             this.loadPlugins();
             this.loadPages();
             if(this.pages.length > 0) {
                 this.buildPages();
                 BlogHubDiagnostics.info('Remove site folder');
-                this.fs3.removeRecursive('./' + this.config.folders.site, function (err, status) {
-                    _this.savePages();
-                    _this.copyThemeFolders();
-                });
+                new System.IO.Directory().remove('./' + this.config.folders.site);
+                this.savePages();
+                this.copyThemeFolders();
             }
         };
         return SiteHub;
@@ -1099,7 +1172,6 @@ var OptionsParser = (function () {
 })();
 var StaticHttpServer = (function () {
     function StaticHttpServer() {
-        this.fs = require('fs');
         this.express = require('express');
     }
     StaticHttpServer.prototype.init = function () {
