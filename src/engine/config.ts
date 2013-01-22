@@ -6,7 +6,6 @@
 
 // **** references
 ///<reference path='BlogHubDiagnostics.ts'/>
-///<reference path='io.ts'/>
 
 class ConfigPropertyNotFoundException implements Error { 
     public name: string;
@@ -160,6 +159,10 @@ class Config {
         return this.get('default_group');
     }
 
+    public get custom() { 
+        return this.get('custom');
+    }
+
     constructor() { 
         this.init();
     }
@@ -167,7 +170,10 @@ class Config {
     public init() { 
         if (!Config.json) {
             BlogHubDiagnostics.debug('loading config file');
-            Config.json = IO.readJsonFile('./_config.json');
+
+            var fileContent = new System.IO.FileHandle().readFile('./_config.json');
+            Config.json = JSON.parse(fileContent);
+
             BlogHubDiagnostics.debug('config file loaded');
         }
     }

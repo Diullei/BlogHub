@@ -9,7 +9,6 @@
 ///<reference path='site/siteHub.ts'/>
 ///<reference path='optionsParser.ts'/>
 ///<reference path='staticHttpServer.ts'/>
-///<reference path='io.ts'/>
 ///<reference path='config.ts'/>
 
 class FolderNotEmptyException implements Error { 
@@ -32,7 +31,6 @@ class CreateSiteTypeException implements Error {
 
 class Main {
     private CURRENT_FOLDER = './';
-    private fs = require('fs');
 
     public batchCompile() {
         var opts = new OptionsParser();
@@ -88,8 +86,7 @@ class Main {
     }
 
     public isFolderEmpty() { 
-        var itens = IO.readDirSync(this.CURRENT_FOLDER);
-        return itens.length == 0;
+        return new System.IO.Directory().isEmpty(this.CURRENT_FOLDER);
     }
 
     public runServer() { 

@@ -22,5 +22,6 @@
 	},
 	"url": "http://current.url",
 	"default_group": "default",
-	"copy_folders": ["css", "img", "js"]
+	"copy_folders": ["css", "img", "js"],
+	"custom": {}
 }

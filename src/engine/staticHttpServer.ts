@@ -6,7 +6,6 @@
 
 // **** references
 ///<reference path='BlogHubDiagnostics.ts'/>
-///<reference path='io.ts'/>
 ///<reference path='config.ts'/>
 
 class StaticHttpServer { 

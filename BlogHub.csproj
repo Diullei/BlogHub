@@ -31,9 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="bin\libs\dateFormat.js" />
-    <Content Include="bin\libs\fs.removeRecursive.js" />
     <Content Include="bin\libs\linq.js" />
-    <Content Include="bin\libs\node-fs.js" />
     <Content Include="bin\libs\showdown.js" />
     <Content Include="definition\linq-2.2.d.ts" />
     <Content Include="definition\node-0.8.d.ts" />
@@ -49,8 +47,6 @@
     <Content Include="src\blogHub.ts" />
     <Content Include="src\engine\blogHubDiagnostics.ts" />
     <Content Include="src\engine\config.ts" />
-    <Content Include="src\engine\io.ts" />
-    <Content Include="src\engine\print.ts" />
     <Content Include="src\engine\main.ts" />
     <Content Include="src\engine\optionsParser.ts" />
     <Content Include="src\engine\site\siteBase.ts" />

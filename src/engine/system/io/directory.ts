@@ -150,5 +150,10 @@ module System.IO {
                 }
             }
         }
+
+        public isEmpty(path) { 
+            var itens = this._fs.readdirSync(path);
+            return itens.length == 0;
+        }
     }
 }

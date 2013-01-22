@@ -3,9 +3,6 @@
 
 // based on http://typescript.codeplex.com/SourceControl/changeset/view/d0d2019499be#src/compiler/optionsParser.ts
 
-// **** references
-///<reference path='print.ts'/>
-
 interface IOptions {
     name?: string;
     flag?: bool;
@@ -62,12 +59,12 @@ class OptionsParser {
     }
 
     public printUsage() {
-        Print.out("Syntax:   bloghub [options]");
-        Print.out("");
-        Print.out("Examples: bloghub --new blog");
-        Print.out("          bloghub --build");
-        Print.out("");
-        Print.out("Options:");
+        console.log("Syntax:   bloghub [options]");
+        console.log("");
+        console.log("Examples: bloghub --new blog");
+        console.log("          bloghub --build");
+        console.log("");
+        console.log("Options:");
 
         var output = [];
         var maxLength = 0;
@@ -115,7 +112,7 @@ class OptionsParser {
 
         // Print padded output
         for (var i = 0; i < output.length; i++) {
-            Print.out(output[i][0] + (new Array(maxLength - output[i][0].length + 3)).join(" ") + output[i][1]);
+            console.log(output[i][0] + (new Array(maxLength - output[i][0].length + 3)).join(" ") + output[i][1]);
         }
     }
 

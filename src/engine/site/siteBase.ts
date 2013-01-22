@@ -7,11 +7,11 @@
 // **** references
 ///<reference path='siteFile.ts'/>
 ///<reference path='../source.ts'/>
+///<reference path='../system/io/FileHandle.ts'/>
 
 module Site {
 
     export class SiteBase {
-        private fs = require('fs');
         private jade = require('jade');
         private config: Config;
 
@@ -44,7 +44,7 @@ module Site {
         public getSource(): Source {
             var fileContent = null;
             try {
-                fileContent = this.fs.readFileSync('./' + this.config.folders.theme + '/' + (this.siteFile.header['template']), this.config.fileEncode);
+                fileContent = new System.IO.FileHandle().readFile('./' + this.config.folders.theme + '/' + (this.siteFile.header['template']));
             }
             catch (err) {
                 console.error("There was an error opening the file:");

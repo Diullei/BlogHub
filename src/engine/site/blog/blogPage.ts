@@ -8,7 +8,6 @@
 ///<reference path='../../blogHubDiagnostics.ts'/>
 ///<reference path='../siteBase.ts'/>
 ///<reference path='../siteHub.ts'/>
-///<reference path='../../print.ts'/>
 
 module Site.Blog {
 

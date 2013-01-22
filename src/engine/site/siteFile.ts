@@ -4,10 +4,12 @@
 // **** definitions
 ///<reference path='../../../definition/node-0.8.d.ts'/>
 
+// **** references
+///<reference path='../system/io/FileHandle.ts'/>
+
 module Site {
 
     export class SiteFile {
-        private fs = require('fs');
         private BREAK_LINE = '\n';
         private config: Config;
 
@@ -20,7 +22,7 @@ module Site {
             var lines = null;
             var fileContent = null;
             try {
-                fileContent = this.fs.readFileSync('./' + this.config.folders.content + '/' + file, this.config.fileEncode);
+                fileContent = new System.IO.FileHandle().readFile('./' + this.config.folders.content + '/' + file);
             }
             catch (err) {
                 console.error("There was an error opening the file:");

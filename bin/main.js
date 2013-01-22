@@ -39,53 +39,6 @@ var BlogHubDiagnostics = (function () {
     }
     return BlogHubDiagnostics;
 })();
-var Site;
-(function (Site) {
-    var SiteFile = (function () {
-        function SiteFile(file) {
-            this.fs = require('fs');
-            this.BREAK_LINE = '\n';
-            this.header = {
-            };
-            this.config = new Config();
-            var lines = null;
-            var fileContent = null;
-            try  {
-                fileContent = this.fs.readFileSync('./' + this.config.folders.content + '/' + file, this.config.fileEncode);
-            } catch (err) {
-                console.error("There was an error opening the file:");
-                console.log(err);
-            }
-            lines = fileContent.split(this.BREAK_LINE);
-            var openHeader = false;
-            for(var i = 0; i < lines.length; i++) {
-                var line = lines[i].trim();
-                if(line != '' && line != '---' && !openHeader) {
-                    console.log(line);
-                    throw new Error('invalid site header file');
-                } else {
-                    if(line == '---') {
-                        if(!openHeader) {
-                            openHeader = true;
-                        } else {
-                            break;
-                        }
-                    } else {
-                        var key = line.split(':')[0];
-                        this.header[key.trim()] = line.substr(key.length + 1).trim();
-                    }
-                }
-            }
-            i++;
-            this.content = '';
-            for(; i < lines.length; i++) {
-                this.content += lines[i] + this.BREAK_LINE;
-            }
-        }
-        return SiteFile;
-    })();
-    Site.SiteFile = SiteFile;    
-})(Site || (Site = {}));
 var System;
 (function (System) {
     })(System || (System = {}));
@@ -236,6 +189,52 @@ var System;
     })(System.IO || (System.IO = {}));
     var IO = System.IO;
 })(System || (System = {}));
+var Site;
+(function (Site) {
+    var SiteFile = (function () {
+        function SiteFile(file) {
+            this.BREAK_LINE = '\n';
+            this.header = {
+            };
+            this.config = new Config();
+            var lines = null;
+            var fileContent = null;
+            try  {
+                fileContent = new System.IO.FileHandle().readFile('./' + this.config.folders.content + '/' + file);
+            } catch (err) {
+                console.error("There was an error opening the file:");
+                console.log(err);
+            }
+            lines = fileContent.split(this.BREAK_LINE);
+            var openHeader = false;
+            for(var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+                if(line != '' && line != '---' && !openHeader) {
+                    console.log(line);
+                    throw new Error('invalid site header file');
+                } else {
+                    if(line == '---') {
+                        if(!openHeader) {
+                            openHeader = true;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        var key = line.split(':')[0];
+                        this.header[key.trim()] = line.substr(key.length + 1).trim();
+                    }
+                }
+            }
+            i++;
+            this.content = '';
+            for(; i < lines.length; i++) {
+                this.content += lines[i] + this.BREAK_LINE;
+            }
+        }
+        return SiteFile;
+    })();
+    Site.SiteFile = SiteFile;    
+})(Site || (Site = {}));
 var System;
 (function (System) {
     (function (IO) {
@@ -376,6 +375,10 @@ var System;
                     }
                 }
             };
+            Directory.prototype.isEmpty = function (path) {
+                var itens = this._fs.readdirSync(path);
+                return itens.length == 0;
+            };
             return Directory;
         })();
         IO.Directory = Directory;        
@@ -404,7 +407,6 @@ var Site;
             this.siteHub = siteHub;
             this.siteFile = siteFile;
             this.file = file;
-            this.fs = require('fs');
             this.jade = require('jade');
             this.showdown = require('./libs/showdown.js');
             this.config = new Config();
@@ -425,7 +427,7 @@ var Site;
         SiteBase.prototype.getSource = function () {
             var fileContent = null;
             try  {
-                fileContent = this.fs.readFileSync('./' + this.config.folders.theme + '/' + (this.siteFile.header['template']), this.config.fileEncode);
+                fileContent = new System.IO.FileHandle().readFile('./' + this.config.folders.theme + '/' + (this.siteFile.header['template']));
             } catch (err) {
                 console.error("There was an error opening the file:");
                 console.log(err);
@@ -443,17 +445,6 @@ var Site;
     })();
     Site.SiteBase = SiteBase;    
 })(Site || (Site = {}));
-var Print = (function () {
-    function Print() { }
-    Print.out = function out(msg) {
-        if(msg.replace) {
-            msg = msg.replace(/Error!/g, '\u001b[31mError!\u001b[0m');
-            msg = msg.replace(/Info!/g, '\u001b[32mInfo!\u001b[0m');
-        }
-        console.log(msg);
-    }
-    return Print;
-})();
 var Site;
 (function (Site) {
     (function (Blog) {
@@ -586,33 +577,6 @@ var Site;
     })(Site.Blog || (Site.Blog = {}));
     var Blog = Site.Blog;
 })(Site || (Site = {}));
-var IO = (function () {
-    function IO() { }
-    IO.fs = require('fs');
-    IO.ncp = require('ncp').ncp;
-    IO.fs2 = require('./libs/node-fs');
-    IO.readFileSync = function readFileSync(file) {
-        var fileContent = null;
-        try  {
-            return fileContent = this.fs.readFileSync(file);
-        } catch (err) {
-            throw new ConfigFileNotFoundException();
-        }
-    }
-    IO.readJsonFile = function readJsonFile(file) {
-        var fileContent = IO.readFileSync(file);
-        return JSON.parse(fileContent);
-    }
-    IO.readDirSync = function readDirSync(path) {
-        return IO.fs.readdirSync(path);
-    }
-    IO.copyFolder = function copyFolder(folder, destination, callback) {
-        IO.ncp(folder, destination, function (err) {
-            callback(err);
-        });
-    }
-    return IO;
-})();
 var ConfigPropertyNotFoundException = (function () {
     function ConfigPropertyNotFoundException(key) {
         this.message = "Config property: '" + key + "' not found";
@@ -824,10 +788,18 @@ var Config = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Config.prototype, "custom", {
+        get: function () {
+            return this.get('custom');
+        },
+        enumerable: true,
+        configurable: true
+    });
     Config.prototype.init = function () {
         if(!Config.json) {
             BlogHubDiagnostics.debug('loading config file');
-            Config.json = IO.readJsonFile('./_config.json');
+            var fileContent = new System.IO.FileHandle().readFile('./_config.json');
+            Config.json = JSON.parse(fileContent);
             BlogHubDiagnostics.debug('config file loaded');
         }
     };
@@ -1075,12 +1047,12 @@ var OptionsParser = (function () {
         return null;
     };
     OptionsParser.prototype.printUsage = function () {
-        Print.out("Syntax:   bloghub [options]");
-        Print.out("");
-        Print.out("Examples: bloghub --new blog");
-        Print.out("          bloghub --build");
-        Print.out("");
-        Print.out("Options:");
+        console.log("Syntax:   bloghub [options]");
+        console.log("");
+        console.log("Examples: bloghub --new blog");
+        console.log("          bloghub --build");
+        console.log("");
+        console.log("Options:");
         var output = [];
         var maxLength = 0;
         this.options = this.options.sort(function (a, b) {
@@ -1119,7 +1091,7 @@ var OptionsParser = (function () {
             }
         }
         for(var i = 0; i < output.length; i++) {
-            Print.out(output[i][0] + (new Array(maxLength - output[i][0].length + 3)).join(" ") + output[i][1]);
+            console.log(output[i][0] + (new Array(maxLength - output[i][0].length + 3)).join(" ") + output[i][1]);
         }
     };
     OptionsParser.prototype.option = function (name, config, short) {
@@ -1207,7 +1179,6 @@ var CreateSiteTypeException = (function () {
 var Main = (function () {
     function Main() {
         this.CURRENT_FOLDER = './';
-        this.fs = require('fs');
     }
     Main.prototype.batchCompile = function () {
         var _this = this;
@@ -1254,8 +1225,7 @@ var Main = (function () {
         new Site.SiteHub().build();
     };
     Main.prototype.isFolderEmpty = function () {
-        var itens = IO.readDirSync(this.CURRENT_FOLDER);
-        return itens.length == 0;
+        return new System.IO.Directory().isEmpty(this.CURRENT_FOLDER);
     };
     Main.prototype.runServer = function () {
         var server = new StaticHttpServer();
@@ -1292,4 +1262,5 @@ try  {
     main.batchCompile();
 } catch (e) {
     BlogHubDiagnostics.fatal(e.message);
+    console.log(e.stack);
 }

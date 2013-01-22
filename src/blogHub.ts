@@ -3,8 +3,7 @@
 
 // **** references
 ///<reference path='engine/main.ts'/>
-///<reference path='engine/print.ts'/>
-///<reference path='engine/BlogHubDiagnostics.ts'/>
+///<reference path='engine/blogHubDiagnostics.ts'/>
 
 require('./libs/dateFormat');
 
@@ -17,4 +16,5 @@ try {
     main.batchCompile();
 } catch (e) { 
     BlogHubDiagnostics.fatal(e.message);
+    console.log(e.stack);
 }
